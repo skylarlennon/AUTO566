@@ -15,6 +15,10 @@ RPM_Max = 6500;                         %Max Motor RPM
 Torque_Max = 230;                       %Max Motor Torque
 
 %% CALCULATING THE STEINMETZ COEFFICIENTS
+% Research: 
+% https://en.wikipedia.org/wiki/Steinmetz%27s_equation
+% https://web.eecs.utk.edu/~dcostine/ECE482/Spring2015/materials/magnetics/CoreLossTechniques.pdf
+
 steinmetz = fittype('k * f^alpha * B^beta', 'independent', {'f', 'B'},...
                     'coefficients', {'k', 'alpha', 'beta'});
 
