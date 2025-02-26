@@ -16,6 +16,7 @@ Torque_Max = 230;                       %Max Motor Torque
 
 %% CALCULATING THE STEINMETZ COEFFICIENTS
 % Research: 
+% https://iris.polito.it/retrieve/handle/11583/2627142/80458/effciency%20mapping%20ecce%20rv2.4.pdf
 % https://en.wikipedia.org/wiki/Steinmetz%27s_equation
 % https://web.eecs.utk.edu/~dcostine/ECE482/Spring2015/materials/magnetics/CoreLossTechniques.pdf
 
