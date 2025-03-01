@@ -202,8 +202,8 @@ ax_save_button = plt.axes([0.85, 0.02, 0.1, 0.04])
 button_save = plt.Button(ax_save_button, 'Save Data')
 button_save.on_clicked(save_data)
 
-# Add a load button in the middle
-ax_load_button = plt.axes([0.45, 0.02, 0.1, 0.04])
+# Add a load button in the middle-left
+ax_load_button = plt.axes([0.30, 0.02, 0.1, 0.04])
 button_load = plt.Button(ax_load_button, 'Load Data')
 button_load.on_clicked(load_data)
 
