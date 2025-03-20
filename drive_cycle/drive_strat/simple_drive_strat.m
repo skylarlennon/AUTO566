@@ -19,8 +19,7 @@ accel_rate = 0.5; %m/s^2
 decel_rate = 0.5; %m/s^2
 max_speed = 15; % max vehicle speed (m/s)
 
-% For Shell Eco Marathon at Indy 500 Road Course, 1 stop per lap, and stop
-% at finish line once per lap.
+% Generate stop points (1 stop per lap + finish line)
 laps = 0;
 for i = 1:length(stop_points)
     if mod(i,2) == 0 % Finish line stops
@@ -35,52 +34,12 @@ for i = 1:length(stop_points)
     end
 end
 
-% calculate driving strategy
-drive_strat = SimpleDriveStrategy(track_file, lap_length, num_laps, stop_points, total_race_time, accel_rate, decel_rate, max_speed);
-
-% extract solution
-x = drive_strat(:,1);
-y = drive_strat(:,2);
-z = drive_strat(:,3);
-v = drive_strat(:,4);
-t = drive_strat(:,5);
-
-figure;
-% Subplot velocity and elevation vs. distance
-subplot(2,1,1)
-hold on
-yyaxis left;
-plot(x, v, 'b', 'LineWidth', 2);
-ylabel('Velocity (m/s)');
-xlabel('Distance (m)');
-
-yyaxis right;
-plot(x, z, 'r', 'LineWidth', 2);
-hold off
-ylabel('Elevation (m)');
-title('Velocity and Elevation vs. Distance');
-grid on;
-
-
-% Subplot: Velocity and elevation vs. time
-subplot(2,1,2);
-hold on
-
-yyaxis left
-plot(t, v, 'b', 'LineWidth', 2);
-ylabel('Velocity (m/s)');
-xlabel('Time (s)');
-
-yyaxis right
-plot(t, z, 'r', 'LineWidth', 2);
-hold off
-ylabel('Elevation (m)');
-title('Velocity & Elevation vs. Time');
-grid on;
+% Calculate driving strategy (this now includes plotting)
+SimpleDriveStrategy(track_file, lap_length, num_laps, stop_points, total_race_time, accel_rate, decel_rate, max_speed);
 
 %% Calculate Simple Drive Strategy
 function drive_matrix = SimpleDriveStrategy(track_file, lap_length, num_laps, stop_points, total_race_time, accel_rate, decel_rate, max_speed)
-   % Load track data
+    % Load track data
     track_data = readmatrix(track_file);
     x_dist = track_data(:,1);
     y_dist = track_data(:,2);
@@ -109,8 +68,8 @@ function drive_matrix = SimpleDriveStrategy(track_file, lap_length, num_laps, st
         error('Acceleration and deceleration rates do not allow completion in the given time. Adjust parameters.');
     end
     
-    Vs1 = (-B + sqrt(discriminant)) / (2 * A); % Take the positive root
-    Vs2 = (-B - sqrt(discriminant)) / (2 * A); % Take the positive root
+    Vs1 = (-B + sqrt(discriminant)) / (2 * A);
+    Vs2 = (-B - sqrt(discriminant)) / (2 * A);
 
     % Take minimum solution for Vs that is greater than 0
     if Vs1 > 0 && Vs2 > 0
@@ -133,35 +92,42 @@ function drive_matrix = SimpleDriveStrategy(track_file, lap_length, num_laps, st
     position = zeros(size(time_vector));
     stopping = false;
     stop_index = 1;
-    
+
+    % stop_index = location of the next stop you havent hit yet.
+
     % Generate velocity profile with acceleration, steady-state, deceleration, and stop phases
+% Generate velocity profile with acceleration, steady-state, and deceleration phases
 for i = 2:length(time_vector)
     dt = time_vector(i) - time_vector(i-1); % Time step size
 
-    % Check if we need to start decelerating for an upcoming stop
-    if stop_index <= num_stops && (position(i-1) + velocity(i-1) * dt >= stop_points(stop_index) - decel_dist)
+    % 1. **Deceleration Phase**: Slow down if near a stop or finish line
+    if stop_index <= num_stops && position(i-1) >= stop_points(stop_index) - decel_dist
         stopping = true;
     end
 
     if stopping
-        % Decelerate towards the stop point
+        % Decelerate
         velocity(i) = max(0, velocity(i-1) - decel_rate * dt);
 
         % Ensure full stop at the stop point
-        if position(i-1) >= stop_points(stop_index) || velocity(i) == 0
-            velocity(i) = 0;  % Explicitly stop the vehicle
-            stopping = false;  % Stop process completed
-            if stop_index < num_stops  % Prevent out-of-bounds index
-                stop_index = stop_index + 1;
+        if abs(position(i-1) - stop_points(stop_index)) < 1e-2 || velocity(i) == 0
+            velocity(i) = 0; % Explicitly stop
+            stopping = false; % Reset stopping flag
+            if stop_index < num_stops
+                stop_index = stop_index + 1; % Move to next stop
             end
         end
-    elseif velocity(i-1) == 0 && stop_index > 1 && position(i-1) == stop_points(stop_index-1)
-        % Accelerate after a stop
+
+    % 2. **Acceleration Phase**: Start moving after a stop
+    elseif velocity(i-1) == 0 || (stop_index > 1 && position(i-1) > stop_points(stop_index-1) && position(i-1) < stop_points(stop_index-1) + accel_dist)
         velocity(i) = min(Vs, velocity(i-1) + accel_rate * dt);
-    elseif position(i-1) < stop_points(1) % Initial acceleration at the start
+
+    % 3. **Ensure Start at 0 m/s (Explicitly Set First Step)**
+    elseif i == 2
         velocity(i) = min(Vs, velocity(i-1) + accel_rate * dt);
+
+    % 4. **Steady-State Phase**
     else
-        % Maintain steady-state velocity
         velocity(i) = Vs;
     end
 
@@ -169,7 +135,9 @@ for i = 2:length(time_vector)
     position(i) = position(i-1) + velocity(i) * dt;
 end
 
-    
+
+
+
     % Perform interpolation using position instead of x_dist
     y_interp = interp1(x_dist, y_dist, position, 'linear', 'extrap');
     elev_interp = interp1(x_dist, elev, position, 'linear', 'extrap');
@@ -179,4 +147,38 @@ end
     
     % Save to CSV
     writematrix(drive_matrix,'drive_strategy.csv');
+
+    %% Plot the results
+    figure;
+    
+    % Subplot velocity and elevation vs. distance
+    subplot(2,1,1)
+    hold on
+    yyaxis left;
+    plot(position, velocity, 'b', 'LineWidth', 2);
+    ylabel('Velocity (m/s)');
+    xlabel('Distance (m)');
+
+    yyaxis right;
+    plot(position, elev_interp, 'r', 'LineWidth', 2);
+    hold off
+    ylabel('Elevation (m)');
+    title('Velocity and Elevation vs. Distance');
+    grid on;
+
+    % Subplot: Velocity and elevation vs. time
+    subplot(2,1,2);
+    hold on
+
+    yyaxis left
+    plot(time_vector, velocity, 'b', 'LineWidth', 2);
+    ylabel('Velocity (m/s)');
+    xlabel('Time (s)');
+
+    yyaxis right
+    plot(time_vector, elev_interp, 'r', 'LineWidth', 2);
+    hold off
+    ylabel('Elevation (m)');
+    title('Velocity & Elevation vs. Time');
+    grid on;
 end
