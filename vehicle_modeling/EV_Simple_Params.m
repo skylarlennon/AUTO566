@@ -22,6 +22,11 @@ timeThetaData = timeseries(theta,time);         % Theta vs time input (vehicle h
 time_step = time(2);
 StopTime = time(end);
 
+%% Error Checking 
+if any(isnan(speed)) || any(isinf(speed))
+    error('Speed data contains NaN or Inf values.');
+end
+
 %% Set Model Parameters
 
 % Environment
@@ -42,14 +47,16 @@ Ndriving = 1;
 Ndriven = 4;
 GR = Ndriven/Ndriving;
 Spinloss = 6; % TODO: Get better estimate & model of transmission losses
-maxBrakeForce = -400; %N
+maxBrakeForce = 400; %N
 
 % Battery
-AccessoryLoad = 100;
 internalResistance = 0.05;
 openCircuitVoltage = 52;
 energyCapacity = 2;
 initialSOC = 0.95;
+
+% Accessory Load (Inverter, DAQ, & Comms Overhead)
+AccessoryLoad = 3.9; % (W) From 'Measured Power Consumption' https://docs.google.com/spreadsheets/d/190vT6v-ePRVMgp5U1tI9A5KcsTzH5T2C7pJzoJzDnBM/edit?gid=5188018#gid=5188018
 
 % PID Controller
 P_Driver = 150;
@@ -59,14 +66,12 @@ D_Driver = 0;
 % Motor (KDE Direct 7208XF)
 motorMaxTorque = 15;
 motorMaxPower = 2e3;
+% motorMaxPower = (openCircuitVoltage^2/(4*internalResistance) - AccessoryLoad)*0.95; % Artificial limit put on motor to not overdraw the battery, assumes constant Voc & Paccessory (w 5% buffer)
 MotorMaxSpeed = 2000/60*2*pi; %radps
 
 % Motor Efficiency Parameters
 % TODO: Make this in agreement w the KDE Direct Motor
-MotorKc = 0.0452;
-MotorKw = 5.0664e-5;
-MotorKi = 0.0167;
-MotorC = 628.2974;
+MotorEfficiency = 0.96;
 
 %% Simulate
 sim('EV_Simple.slx')
@@ -106,12 +111,14 @@ grid on
 hold on
 
 yyaxis left
-plot(tout, speedCommand,'-b')
+% plot(tout, speedCommand,'-b')
+plot(time, speedCommand,'-b')
 plot(tout, speedVehicle,'-r')
 ylabel('Velocity (m/s)')
 
 yyaxis right
-plot(tout,elevation,'-k')
+% plot(tout,elevation,'-k')
+plot(time,elevation,'-k')
 h = ylabel('Elevation (m)');
 set(h,'Color','black')
 ax = gca;
