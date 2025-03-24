@@ -11,52 +11,38 @@ elevation = driveCycle(:, 3);
 speed = driveCycle(:, 4);
 time = driveCycle(:, 5);
 
-theta = driveCycle(:,5); %% TODO
-MAX_GRADE = max(theta)
-timeSpeedData = timeseries(speed,time);
-timeThetaData = timeseries(theta,time);
+deltaDistance = diff(distanceX);                % Calculate distance between consecutive points
+deltaElevation = diff(elevation);               % Calculate elevation change between consecutive points
+theta = atan2(deltaElevation, deltaDistance);   % Calculate road grade (theta) at each point (Output is in radians)
+theta = [theta(1); theta];                      % Interpolate theta to match the length of the original arrays and keep the first value constant
+
+timeSpeedData = timeseries(speed,time);         % Commanded speed input
+timeThetaData = timeseries(theta,time);         % Theta vs time input (vehicle has to match drive cycle for this to work)
+
 time_step = time(2);
-dataSize = length(speed);
 StopTime = time(end);
-numLaps = 10;
 
 %% Set Model Parameters
-
-% PID Controller
-P_Driver = 150;
-I_Driver = 0.40;
-D_Driver = 0;
 
 % Environment
 airDensity = 1.293;
 gravity = 9.81;
 
 % Vehicle
-maxBrakeForce = -400; %N
-rollingResistCoeff = 0.01;
+rollingResistCoeff = 0.01; % TODO: Get better estimate
 massVeh = 130; %kg
 aeroDragCoeff = 0.17;
 frontArea = 0.951; %m^2
 cdaf = airDensity*aeroDragCoeff;
 
-% Motor (KDE Direct 7208XF)
-motorMaxTorque = 15;
-motorMaxPower = 2e3;
-MotorMaxSpeed = 2000/60*2*pi; %radps
-
 % Drivetrain
 r_wheel = 0.3048;
+% TODO: Next model has non-static gear ratio
 Ndriving = 1; 
 Ndriven = 4;
 GR = Ndriven/Ndriving;
-Spinloss = 6;
-
-% Motor Efficiency Parameters
-% TODO: Make this in agreement w the KDE Direct Motor
-MotorKc = 0.0452;
-MotorKw = 5.0664e-5;
-MotorKi = 0.0167;
-MotorC = 628.2974;
+Spinloss = 6; % TODO: Get better estimate & model of transmission losses
+maxBrakeForce = -400; %N
 
 % Battery
 AccessoryLoad = 100;
@@ -64,6 +50,23 @@ internalResistance = 0.05;
 openCircuitVoltage = 52;
 energyCapacity = 2;
 initialSOC = 0.95;
+
+% PID Controller
+P_Driver = 150;
+I_Driver = 0.40;
+D_Driver = 0;
+
+% Motor (KDE Direct 7208XF)
+motorMaxTorque = 15;
+motorMaxPower = 2e3;
+MotorMaxSpeed = 2000/60*2*pi; %radps
+
+% Motor Efficiency Parameters
+% TODO: Make this in agreement w the KDE Direct Motor
+MotorKc = 0.0452;
+MotorKw = 5.0664e-5;
+MotorKi = 0.0167;
+MotorC = 628.2974;
 
 %% Simulate
 sim('EV_Simple.slx')
@@ -115,7 +118,7 @@ ax = gca;
 ax.YColor = 'black';
 
 hold off
-xlim([0 tout(end)/numLaps*3])
+xlim([0 tout(end)])
 xlabel('Time (s)')
 legend('Drive Cycle Velocity','Simulated Velocity','Elevation')
 title('EV Simple Drive Cycle Adherance Over Time')
@@ -197,7 +200,7 @@ ax = gca;
 ax.YColor = 'black';
 
 hold off
-xlim([0 tout(end)/numLaps*3]) %plot 3 laps
+xlim([0 tout(end)]) %plot 3 laps
 xlabel('Time (s)')
 legend('Positive Tractive Force','Friction Braking Force','Elevation')
 title('EV Simple Motor Tractive Force Over Time')
@@ -237,5 +240,3 @@ total_dist_mi = distanceX(end)*0.000621371 %0.000621371 mi/m
 total_efficiency_miles_per_kWh = total_dist_mi/propellingEnergyOut(end)
 total_efficiency_mpge = total_efficiency_miles_per_kWh*33.705
 
-
-frictionBrakingForceOut1

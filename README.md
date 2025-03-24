@@ -19,10 +19,45 @@ A typical drive cycle contains a set of datapoints describing the speed of a veh
 
 Some drive cycles also incorporate elevation change into the simulation in order to provide a more accurate representation of typical driving conditions. Within this repo, we will simulate both flat tracks, and tracks with elevation changes.
 
-$Track$ $Modeling$: This section show how we generate track models that are both 2D and 3D. We've developed a [program](/drive_cycle/track_modeling/linear_track_generator.m) that can generate an arbitrary piecewise linear 2D track as well as a [program](/drive_cycle/track_modeling/linearizeTrack.m) that can take real life GPS data and 'flatten it out' to generate a 2D representation of a real life track. The [program](/drive_cycle/track_modeling/nonlinear_track_generator.m) to generate our 3D track models are simply comprised of real life GPS data for anticipated tracks that the Shell Eco Marathon competition may be held at over the next several years. 
+$Track$ $Modeling$: This section show how we generate track models that are both 2D and 3D. We've developed 3 track modeling programs. The first is a [linear track generator program](/drive_cycle/track_modeling/linear_track_generator.m) that can generate an arbitrary continuous piecewise linear 2D track. The second [program](/drive_cycle/track_modeling/linearizeTrack.m) can take real life GPS data and 'flatten it out' to generate a 2D representation of a 3D track. The final [program](/drive_cycle/track_modeling/nonlinear_track_generator.m) generates a 3D track models using GPS data from anticipated tracks that the Shell Eco Marathon competition may be held at over the next several years.
+
+It's worth noting that when generating 3D tracks, there is an element of race strategy involved. The tutorial below describes how to obtain GPS data from google earth to be used in the track model. The tutorial describes a method in which you only select the points on the map where the vehicle will drive. Thus you are effectively selecting the racing line when generating the 3D track model, and must do so intentionally.  
+
+[This paper]() describes how to use several heuristics to define an optimal racing line. 
+
+[TODO]: 
+- DESCRIBE INPUTS AND OUTPUTS
+    -  SPECIFICALLY HOW FOR 2D TRACKS, XPOS IS DISTANCE ALONG THE TRACK, NOT JUST CHANGE IN X 
+    - SHOW PICTURE OF THE TRIG
+- TODO: make sure the time domains line up, and mess with the solver if they don't 
+
+
+
+
+$Drive$ $Strategy$ $Modeling$: Whether it be traditional racing or efficiency marathons, the way in which the vehicle is driven makes all the difference. In this section we introduce [N-TBD] race strategy models categorized by their drive strategy and their accompanying track model.
+
+1. [Steady State-Flat Track](/drive_cycle/drive_strat/steady_state_flat_track.m): This model generates the time speed points for a drive cycle where the vehicle accelerates and decellerates at constant values, then remains at a steady state speed  
+2. 
+
+## VEHICLE MODELING
+
+$Vehicle$ $Dynamics$ $Modeling$
+- [TODO]
 
 $Drive$ $Strategy$ $Modeling$
-- TODO
+- [TODO]
+
+$Battery$ $Modeling$
+- [TODO]
+
+$Inverter$ $Modeling$
+- [TODO]
+
+$Motor$ $Modeling$
+- [TODO]
+
+$Transmission$ $Modeling$
+- [TODO]
 
 
 ## [TODO] References
