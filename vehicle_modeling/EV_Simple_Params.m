@@ -52,6 +52,7 @@ maxBrakeForce = 400; %N
 % Battery
 internalResistance = 0.05;
 openCircuitVoltage = 52;
+V_t = 48;
 energyCapacity = 2;
 initialSOC = 0.95;
 
@@ -63,15 +64,26 @@ P_Driver = 150;
 I_Driver = 0.40;
 D_Driver = 0;
 
+% Inverter
+% MOSFET params
+TotalMosfets = 12;
+MosfetsPerPhase = TotalMosfets/3;
+R_ds = 1.3e-3;
+t_on = 6.60E-08;
+t_off = 1.15E-07;
+f_sw = 20000;
+
 % Motor (KDE Direct 7208XF)
 motorMaxTorque = 15;
 motorMaxPower = 2e3;
-% motorMaxPower = (openCircuitVoltage^2/(4*internalResistance) - AccessoryLoad)*0.95; % Artificial limit put on motor to not overdraw the battery, assumes constant Voc & Paccessory (w 5% buffer)
-MotorMaxSpeed = 2000/60*2*pi; %radps
-
-% Motor Efficiency Parameters
+MotorMaxSpeed = 2000/60*2*pi; % [radps]
 % TODO: Make this in agreement w the KDE Direct Motor
-MotorEfficiency = 0.96;
+MotorEfficiency = 0.96; % [%]
+Kv = 135; % [RPM/V]
+R_ph = 0.11;
+
+% Constants
+rps2rpm = 60/(2*pi);
 
 %% Simulate
 sim('EV_Simple.slx')

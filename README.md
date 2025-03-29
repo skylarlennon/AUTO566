@@ -13,6 +13,7 @@ This AUTO 566 project involves generating models of varying levels of complexity
 
 This README will walk you through the entire project, allowing you to understand, tweak, and recreate models for similar future vehicles. While I encourage you to explore the repo, there is a natural progression through this repo to build up the drive cycle and vehicle models which is described briefly here:
 
+[TODO] TALK ABOUT HOW THIS IS BACKWARDS MODELING GIVE THE IMAGE FROM THE ROAD LOAD TO THE BATTERY
 
 ## DRIVE CYCLE MODELING
 A typical drive cycle contains a set of datapoints describing the speed of a vehicle over time. This can then be used to simulate the vehicle under development and estimate how it will perform. 
