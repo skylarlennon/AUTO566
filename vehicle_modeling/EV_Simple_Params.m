@@ -117,6 +117,12 @@ brakingEnergyOut = results(:,26);
 velocityOut = results(:,27);
 vehPosOut = results(:,28);
 
+%% Calculate Important Stats
+total_Energy_Consumed_kW = bateryEnergyAtTerminals(end)*(1/1000)*(1/3600)
+total_dist_mi = distanceX(end)*0.000621371 %0.000621371 mi/m
+total_efficiency_miles_per_kWh = total_dist_mi/total_Energy_Consumed_kW
+total_efficiency_mpge = total_efficiency_miles_per_kWh*33.705
+
 %% Plot Drive Cycle Adherance Over Time
 figure(1)
 grid on
@@ -255,7 +261,9 @@ xlabel('Time (s)')
 ylabel('Braking Energy (kWh)')
 grid on
 
-total_dist_mi = distanceX(end)*0.000621371 %0.000621371 mi/m
-total_efficiency_miles_per_kWh = total_dist_mi/propellingEnergyOut(end)
-total_efficiency_mpge = total_efficiency_miles_per_kWh*33.705
-
+figure
+plot(simTime,batteryCurent)
+xlabel('Time (s)')
+ylabel('Current (A)')
+title("Battery Current vs Time")
+grid on
