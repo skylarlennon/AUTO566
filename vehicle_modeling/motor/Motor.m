@@ -2,16 +2,16 @@ classdef Motor
     % Class for BLDC Motor
 
     properties
-        K_t (1, 1) double = 1; % Torque Constant
-        alpha_Kt (1, 1) double = 0;
-        K_e (1, 1) double = 1; % Back-emf Constant
-        alpha_Ke (1, 1) double = 0;
-        I_stall (1, 1) double = 300; % Stall Current
-        r (1, 1) double {mustBePositive} = 0.2; % Phase resistance of motor
-        alpha_r (1, 1) double = 0; % Resistance M_terature Coefficient
-        lambda_ec (1, 1) double = 0; % Eddy Current Loss Coefficient
-        alpha_ec (1, 1) double = 0; % Eddy Current Loss M_terature Coefficient
-        hys (1, 1) double = 0; % Hysteresis
+        K_t (1, 1) double = 0.0707; % Torque Constant
+        alpha_Kt (1, 1) double = -0.0006; % Nm (A * deg C)
+        K_e (1, 1) double = 0.0707; % Back-emf Constant
+        alpha_Ke (1, 1) double = -0.0006;
+        I_stall (1, 1) double = 38; % Stall Current
+        r (1, 1) double {mustBePositive} = 0.113; % Phase resistance of motor
+        alpha_r (1, 1) double = 0.0039; % Resistance deg C Coefficient
+        lambda_ec (1, 1) double = 0.3; % Eddy Current Loss Coefficient
+        alpha_ec (1, 1) double = -0.0001; % Eddy Current Loss M_terature Coefficient
+        hys (1, 1) double = 1.0; % Hysteresis
         alpha_hys (1, 1) double = 0; % Hysteresis M_terature coefficient
         STC = 23;
         M_t (1, 1) double {mustBePositive} = 23;
