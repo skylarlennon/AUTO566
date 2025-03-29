@@ -46,7 +46,7 @@ r_wheel = 0.3048;
 Ndriving = 1; 
 Ndriven = 4;
 GR = Ndriven/Ndriving;
-Spinloss = 6; % TODO: Get better estimate & model of transmission losses
+Spinloss = 0.1; % [N-m] TODO: Get better estimate & model of transmission losses
 maxBrakeForce = 400; %N
 
 % Battery
