@@ -3,7 +3,7 @@
 ## Authors 
 ### Vijay Balasekaran   vbalasek@umich.edu
 ### Savannah Belton     sbelton@umich.edu
-### Austin Leiphard     leiphart@umich.edu
+### Austin Leiphart     leiphart@umich.edu
 ### Skylar Lennon       skylarl@umich.edu
 ### Ryan O'Malley       romalley@umich.edu
 
