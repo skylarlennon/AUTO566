@@ -16,13 +16,13 @@ This README will walk you through the entire project, allowing you to understand
 1. Model the track
 2. Generate a drive strategy
 3. Model the vehicle dynamics
-4. Model vehicle energy flow
+4. Model vehicle power/energy flow
     Battery -> Inverter --> Motor --> Transmission --> Road
 5. Simulate & view results
 6. Tweak one variable within steps 1-4. 
 7. Repeat step 5.
 
-One very important thing to note is that a reverse-modeling strategy is employed. In reverse modeling, the input is the desired vehicle behavior-what we'll refer to as the drive cycle-which defines a speed profile of the vehicle. The drive cycle also encapsulates route (or racing line) the vehicle will drive, including turning and elevation changes. We have anticipated 3 potential courses for the '26 & '27 SEM, the Detroit Streets, the Indy Road Course, and the Sonoma Raceway, described below.
+One very important thing to note is that a reverse-modeling strategy is employed. In reverse modeling, the input is the desired vehicle behavior-what we'll refer to as the drive cycle-which defines a speed profile of the vehicle. The drive cycle also encapsulates route (or racing line) the vehicle will drive, including turning and elevation changes. We have anticipated 3 potential courses for the '26 & '27 SEM including the streets of Detroit, the Indy Road Course, and the Sonoma Raceway, described below.
 
 ## TRACK MODELING
 We cannot model our vehicle's performance if we do not know the terrain upon which it will be driving. So, we begin with modeling the 3 tracks at which we anticipate the '26 & '27 SEM may be held. 
@@ -31,7 +31,7 @@ We cannot model our vehicle's performance if we do not know the terrain upon whi
 
 ![Detroit Course](media/Detroit_Track_Google_Maps.png)
 
-2. **The Indianapolis Motor Speedway Road course**: This is the track at which the '22, '23, '24, and '25 SEM has been held. While the location of the '26, & '27 SEM unknown (as of 3-29-25) is the most likely candidate. As such, we will model the track including its minor elevation changes, and a manually chosen racing line derrived from heuristics found in [this paper](TODO).
+2. **The Indianapolis Motor Speedway Road course**: This is the track at which the '22, '23, '24, and '25 SEM has been held. While the location of the '26, & '27 SEM is unknown (as of 3-29-25), this course is the most likely candidate. As such, we will model the track including its minor elevation changes.
 
 ![Indy Road Course](media/indy-road-course-layout.jpg)
 
@@ -54,6 +54,10 @@ Our advanced track models will be 3D models, incorporating turns and elevation c
 
 ![Sonoma](media/Sonoma_Raceway_Animation.gif)
 
+For each track, a racing line will be manualy transcribed based on heuristics found in [this paper](TODO). We'd like to use the strategies described in the paper along with real GPS data for each track in order to generate the the track model.
+
+[TODO]: translate the instructions in [this doc](https://docs.google.com/document/d/1OqPbcJZFi8pWBwTCyKMTRlEqdDSNF1haZ38S6mFxTT0/edit?tab=t.0) to fit within the context of this project
+
 
 ## DRIVING STRATEGY
 [TODO: BRIEF INTRO]
@@ -64,16 +68,21 @@ Our advanced track models will be 3D models, incorporating turns and elevation c
 - Don't exceed max parameters for whole powertrain
 
 **Flat Track Drive Strategies:**
-- Start here to optimize PnG
-- Theoretical max efficiency 
+- All tracks considered without elevation chagnes
+- Start here to optimize PnG (number of pulses, high and low values for pulse, etc)
+- Should yeild theoretical max efficiency 
 
 **Linearized Track Strategies:**
 - Section off PnG & downhill coasting
+- Optimize PnG with this consideration
+- Transition between PnG & coast (transition at max speed? min speed?)
 - 
 
+
 **Non-Linear Track Stragegies**
-- Section off PnG, downhill coasting, and turning
+- Section off into PnG, downhill coasting, and turning sections
 - Optimizes both speed and turns for max efficiency
+- Simplified model of additional load based on turning. (no tire losses, only additional load? Force balance based on turning = centripetal acceleration)
 
 
 ## VEHICLE MODELING
