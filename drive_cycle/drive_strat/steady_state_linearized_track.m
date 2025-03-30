@@ -45,9 +45,9 @@ function drive_matrix = SimpleDriveStrategy(track_file, lap_length, num_laps, st
     % elev = [];
     % Repeat data based on number of laps.
     % for i = 1:num_laps
-        x_dist = [x_dist; track_data(:,1)];
-        y_dist = [y_dist; track_data(:,2)];
-        elev = [elev; track_data(:,3)];
+        x_dist = track_data(:,1);
+        y_dist = track_data(:,2);
+        elev = track_data(:,3);
     % end
     
     
