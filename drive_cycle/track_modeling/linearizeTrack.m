@@ -27,7 +27,7 @@ rawTrack = [x, y, z];
 totalDist = 0;
 %distLog = [];
 subsampledTrack = rawTrack(1, :);
-linearizedTrack = [0, 0];
+linearizedTrack = [0, 0, 0];
 
 for i = 2:length(rawTrack)
    dist = norm(subsampledTrack(end, :) - rawTrack(i, :));     %calculate the euclidean distance from the previous point to the current point
@@ -35,7 +35,7 @@ for i = 2:length(rawTrack)
    if (totalDist + dist) / 5 > size(subsampledTrack, 1)       %this spaces out the points to every 5 meters
       totalDist = totalDist + dist;
       subsampledTrack = [subsampledTrack; rawTrack(i, :)];    %append point to subsampled points
-      linearizedTrack = [linearizedTrack; totalDist, rawTrack(i, 3)];   %keep track of 2D track
+      linearizedTrack = [linearizedTrack; totalDist, 0, rawTrack(i, 3)];   %keep track of 2D track (X, Y=0, Z)
    end
 end
 
@@ -51,7 +51,9 @@ csvwrite('../drive_strat/csv/sonomaMeters.csv', subsampledTrack);
 csvwrite('../drive_strat/csv/sonomaLinearized.csv', linearizedTrack);
 
 figure;
-plot(linearizedTrack(:, 1), linearizedTrack(:, 2));
+plot(linearizedTrack(:, 1), linearizedTrack(:, 3));
 xlabel('Distance along track in m');
 ylabel('Relative elevation in m');
 grid on;
+
+lap_length_mi = totalDist/1609
