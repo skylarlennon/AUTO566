@@ -67,8 +67,8 @@ Make sure to put the placemarks at the center of the track and to place the firs
 ![ConfiguredGPSVisualizer](media/GPSVisualizer_Configured.png)
 7. Click 'Convert' and Download the zip file
 ![ZipDownload](media/GPSVisualizerOutput.png)
-8. Upzip and move to [drive_cycle/track_modeling/csv](drive_cycle/track_modeling/csv)
-9. Rename file and match with name used in [linearizeTrack.m](drive_cycle/track_modeling/linearizeTrack.m)
+8. Upzip and move to [drive_cycle/track_modeling/csv/raw](drive_cycle/track_modeling/csv/raw/)
+9. Rename file with following convention: TrackName_raw.csv to be compatible with [linearizeTrack.m](drive_cycle/track_modeling/linearizeTrack.m)
 
 
 

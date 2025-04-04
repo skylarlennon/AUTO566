@@ -50,13 +50,13 @@ track_matrix = LinearTrackGenerator(lap_length, num_laps, elev_profile_type, ele
 
 %% Save Track Model to CSV locally and for drive strat
 if elev_profile_type == 'flat'
-    filenameLocal = sprintf('csv/flat_projected/%s.csv', track_name);
-    filenamDriveStrat = sprintf('../drive_strat/csv/flat_projected/%s.csv',track_name);
+    filenameLocal = sprintf('csv/flat_projected/%s_flat_projected.csv', track_name);
+    filenamDriveStrat = sprintf('../drive_strat/csv/flat_projected/%s_flat_projected.csv',track_name);
     writematrix(track_matrix, filenameLocal);
     writematrix(track_matrix, filenamDriveStrat);
 else
-    filenameLocal = sprintf('csv/elev_projected/%s.csv', track_name);
-    filenamDriveStrat = sprintf('../drive_strat/csv/elev_projected/%s.csv',track_name);
+    filenameLocal = sprintf('csv/elev_projected/%s_elev_projected.csv', track_name);
+    filenamDriveStrat = sprintf('../drive_strat/csv/elev_projected/%s_elev_projected.csv',track_name);
     writematrix(track_matrix, filenameLocal);
     writematrix(track_matrix, filenamDriveStrat);
 end
