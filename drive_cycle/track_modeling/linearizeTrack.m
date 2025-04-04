@@ -1,6 +1,6 @@
 clear; clc; close all;
 
-trackData = importdata('csv/sonoma.csv');   %import raw csv from SwiftNav
+trackData = importdata('csv/raw/sonomaRaw.csv');   %import raw csv from SwiftNav
 trackData = trackData.data;             %cut off the header
 trackData = trackData(1500:18280, :);   %cut the data so there is no overlap
 
