@@ -1,56 +1,60 @@
 %% simple_drive_strat.m
 % Auto 566 Supermileage
 % Author: Skylar Lennon (using ChatGPT & Claude AIs)
-
 clc;clear;close all
 
-%% Select Track
+%% === Define All Track Configurations ===
+track_configs = [
+    struct( ...
+        'name', "Detroit Streets", ...
+        'file', ["csv/flat_projected/Detroit_flat_projected.csv", ...
+                 "csv/elev_projected/Detroit_elev_projected.csv"], ...
+        'num_laps', 4, ...
+        'stop_point', 1947 ...
+    );
+    struct( ...
+        'name', "Indianapolis Motor Speedway", ...
+        'file', ["csv/flat_projected/Indy_flat_projected.csv", ...
+                 "csv/elev_projected/Indy_elev_projected.csv"], ...
+        'num_laps', 4, ...
+        'stop_point', 1867 ...
+    );
+    struct( ...
+        'name', "Sonoma Raceway", ...
+        'file', ["csv/flat_projected/Sonoma_flat_projected.csv", ...
+                 "csv/elev_projected/Sonoma_elev_projected.csv"], ...
+        'num_laps', 10, ...
+        'stop_point', 395 ...
+    )
+];
+
+%% === Select Track ===
 track_number = 3;   % 1 = Detroit Streets
                     % 2 = Indianapolis Motor Speedway
-                    % 3 = Sonoma Raceway
-track_file = "";                   
-switch track_number
-    case 1
-        track_file = "csv/Detroit.csv";
-    case 2
-        track_file = "csv/Indy.csv";
-    case 3
-        track_file = "csv/Sonoma.csv";
-    otherwise
-        error("Not a valid track number"); 
-end
+                    % 3 = Sonoma Raceway 
+track_type = 2;     % 1 = Flat Projection
+                    % 2 = Elevated Projection
 
+%% === Auto-load settings ===
+selected_track = track_configs(track_number);
+track_file = selected_track.file(track_type);
+
+% Validate track file
 if exist(track_file, 'file') ~= 2
     error("Track file does not exist")
 end
-
-%% Load Track Model 
 track_data = readmatrix(track_file);
-lap_length = track_data(end,1);
-num_laps = 4;                               % [Edit based on track]
-stop_point = 1899;                          % [Edit based on track]
-stop_points = zeros(1, 2*num_laps-1);
 
-%% Driving Strategy
+num_laps = selected_track.num_laps;
+stop_point = selected_track.stop_point;
+lap_length = track_data(end,1);         % Assumes track data gives single lap
+stop_points = generate_stop_points(2*num_laps-1,lap_length,stop_point);
+
+%% Define Driving Strategy
 total_race_time = 35; % [minutes]           % [Edit based on track]
-accel_rate = 0.25; % [m/s^2]                % [Edit based on track]
+accel_rate = 0.3; % [m/s^2]                % [Edit based on track]
 decel_rate = 0.25; % [m/s^2]                % [Edit based on track]
-max_speed = 15; % [m/s]                     % [Edit based on vehicle]
-    
-% Generate stop points (1 stop per lap + finish line)
-laps = 0;
-for i = 1:length(stop_points)
-    if mod(i,2) == 0 % Finish line stops
-        stop_points(i) = lap_length * laps;
-    else % Mid-race stops
-        stop_points(i) = lap_length * laps + stop_point;
-    end
-
-    % Increment lap counter after each pair of stops
-    if mod(i,2) == 1
-        laps = laps + 1;
-    end
-end
+max_speed = 15; % [m/s]                     % [Edit based on vehicle]           
 
 % Calculate driving strategy (this now includes plotting)
 SimpleDriveStrategy(track_file, lap_length, num_laps, stop_points, total_race_time, accel_rate, decel_rate, max_speed);
@@ -61,14 +65,27 @@ function drive_matrix = SimpleDriveStrategy(track_file, lap_length, num_laps, st
     x_dist = track_data(:,1);
     y_dist = track_data(:,2);
     elev = track_data(:,3);
+    
+    n_points = length(track_data(:,1));
+    x_dist_full = zeros(n_points * num_laps, 1);
+    y_dist_full = zeros(n_points * num_laps, 1);
+    elev_full = zeros(n_points * num_laps, 1);
+    
+    % Duplicate track data num_laps times
+    for i = 0:(num_laps-1)
+        idx = (1:n_points) + i * n_points;
+        x_dist_full(idx) = x_dist + i * lap_length;
+        y_dist_full(idx) = y_dist;
+        elev_full(idx) = elev;
+    end
 
     % Ensure unique and sorted x_dist
-    [x_dist, unique_idx] = unique(x_dist, 'stable');
-    y_dist = y_dist(unique_idx);
-    elev = elev(unique_idx);
+    [x_dist_full, unique_idx] = unique(x_dist_full, 'stable');
+    y_dist_full = y_dist_full(unique_idx);
+    elev_full = elev_full(unique_idx);
 
     % Define time step resolution
-    num_time_steps = length(x_dist) * 10;
+    num_time_steps = length(x_dist_full) * 10;
     time_vector = linspace(0, total_race_time * 60, num_time_steps)';
 
     % Compute total race distance
@@ -78,7 +95,6 @@ function drive_matrix = SimpleDriveStrategy(track_file, lap_length, num_laps, st
 
     % Find the average velocity without considering accel & decel
     avg_velo = total_distance/(total_race_time*60);
-
 
     % Solve for steady-state velocity (Vs) using quadratic equation
     % Only count the intermediate stops (not start/finish) for acceleration/deceleration phases
@@ -204,32 +220,32 @@ function drive_matrix = SimpleDriveStrategy(track_file, lap_length, num_laps, st
 
     % Interpolate track data
     % Handle potential out-of-bounds issues with position exceeding x_dist range
-    max_x_dist = max(x_dist);
+    max_x_dist = max(x_dist_full);
     valid_positions = position <= max_x_dist;
 
     % Use valid positions for interpolation
     y_interp = NaN(size(position));
     elev_interp = NaN(size(position));
 
-    y_interp(valid_positions) = interp1(x_dist, y_dist, position(valid_positions), 'linear');
-    elev_interp(valid_positions) = interp1(x_dist, elev, position(valid_positions), 'linear');
+    y_interp(valid_positions) = interp1(x_dist_full, y_dist_full, position(valid_positions), 'linear');
+    elev_interp(valid_positions) = interp1(x_dist_full, elev_full, position(valid_positions), 'linear');
 
     % Extrapolate for positions beyond track data
     remaining_positions = ~valid_positions & isfinite(position);
     if any(remaining_positions)
         % Extrapolate using last available point or some logical extension
-        y_interp(remaining_positions) = y_dist(end);
-        elev_interp(remaining_positions) = elev(end);
+        y_interp(remaining_positions) = y_dist_full(end);
+        elev_interp(remaining_positions) = elev_full(end);
     end
 
     % Combine into output matrix
     drive_matrix = [position, y_interp, elev_interp, velocity, time_vector];
 
     % Save CSV local
-    writematrix(drive_matrix, 'csv/drive_strategy.csv');
+    % writematrix(drive_matrix, 'csv/drive_strategy.csv');
 
     % Save CSV for vehicle model
-    writematrix(drive_matrix, '../../vehicle_modeling/drive_strategy.csv');
+    % writematrix(drive_matrix, '../../vehicle_modeling/drive_strategy.csv');
 
     % Plot the results
     figure;
@@ -303,4 +319,20 @@ function drive_matrix = SimpleDriveStrategy(track_file, lap_length, num_laps, st
     fprintf('- Deceleration distance: %.2f m\n', decel_dist);
     fprintf('- Total race distance: %.2f m\n', total_distance);
     fprintf('- Total race time: %.2f minutes\n', time_vector(end)/60);
+end
+
+function stop_points = generate_stop_points(sizeStopPoints,lap_length,stop_point)
+    stop_points = zeros(1,sizeStopPoints);
+    laps = 0;
+    for i = 1:sizeStopPoints
+        if mod(i,2) == 0 % Finish line stops
+            stop_points(i) = lap_length * laps;
+        else % Mid-race stops
+            stop_points(i) = lap_length * laps + stop_point;
+        end
+        % Increment lap counter after each pair of stops
+        if mod(i,2) == 1
+            laps = laps + 1;
+        end
+    end
 end
