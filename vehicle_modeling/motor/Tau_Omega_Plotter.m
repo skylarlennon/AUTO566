@@ -5,7 +5,7 @@ close all;
 
 %% Load Driving Data
 tire_radius = 0.554 / 2;
-csv_path = "C:\\Users\\JZ0Q7P\\Documents\\MATLAB\\wsc_2025_at_28.0556.csv";
+csv_path = "wsc_2025_at_28.0556.csv";
 data = readtable(csv_path);
 
 tau = 0;
@@ -28,6 +28,7 @@ end
 
 % Define motor operating ranges
 speed_rpm = linspace(0, 5000, 100);     % RPM
+omega = speed_rpm.*2.*pi./60;
 torque_nm = linspace(0, 3.5, 100);       % Torque in Nm
 
 [speed_grid_rpm, torque_grid] = meshgrid(speed_rpm, torque_nm);
@@ -69,32 +70,42 @@ ylabel('Torque [Nm]');
 title('Motor Efficiency Map (From Power Loss Model)');
 grid on;
 
+%% Save to csv
+outputFileName = "../csv/motorEffOut.csv"
+outputMatrix = zeros(length(speed_rpm)+1, length(torque_nm)+1);
+outputMatrix(2:end,2:end) = eta_map;
+outputMatrix(2:end,1) = torque_nm;
+outputMatrix(1,2:end) = omega;
+zeroIdx = (outputMatrix == 0);
+outputMatrix(zeroIdx) = 0.25;
+writematrix(outputMatrix,outputFileName);
+
 %% Figure 2: I²R Power Loss Map (Resistive Losses Only)
 
 % Reuse speed and torque grid
-speed_rpm = linspace(0, 5000, 100);
-torque_nm = linspace(0, 3.5, 100);
-[speed_grid_rpm, torque_grid] = meshgrid(speed_rpm, torque_nm);
-omega_grid = speed_grid_rpm * 2 * pi / 60;
-
-% Initialize resistive loss matrix
-P_loss_R = zeros(size(omega_grid));
-
-for i = 1:numel(omega_grid)
-    P_loss_R(i) = motor.get_power_loss_resistive(torque_grid(i));
-end
-
-% Plot contour
-figure(2); clf;
-contourf(speed_grid_rpm, torque_grid, P_loss_R, 10, 'ShowText', 'on');
-colormap(parula);
-colorbar;
-title('I²R Losses');
-xlabel('RPM');
-ylabel('Torque (N·m)');
-c = colorbar;
-c.Label.String = 'Power Loss (W)';
-grid on;
-
-
-
+% speed_rpm = linspace(0, 5000, 100);
+% torque_nm = linspace(0, 3.5, 100);
+% [speed_grid_rpm, torque_grid] = meshgrid(speed_rpm, torque_nm);
+% omega_grid = speed_grid_rpm * 2 * pi / 60;
+% 
+% % Initialize resistive loss matrix
+% P_loss_R = zeros(size(omega_grid));
+% 
+% for i = 1:numel(omega_grid)
+%     P_loss_R(i) = motor.get_power_loss_resistive(torque_grid(i));
+% end
+% 
+% % Plot contour
+% figure(2); clf;
+% contourf(speed_grid_rpm, torque_grid, P_loss_R, 10, 'ShowText', 'on');
+% colormap(parula);
+% colorbar;
+% title('I²R Losses');
+% xlabel('RPM');
+% ylabel('Torque (N·m)');
+% c = colorbar;
+% c.Label.String = 'Power Loss (W)';
+% grid on;
+% 
+% 
+% 

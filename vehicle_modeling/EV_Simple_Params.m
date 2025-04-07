@@ -2,7 +2,14 @@
 %TODO: ADD DESCRIPTION HERE
 clc;clear;close all
 %% Load Drive Cycle Data
-driveCycle = readmatrix('drive_strategy.csv');
+driveCycle = readmatrix('csv/drive_strategy.csv');
+rawMotorEff = readmatrix("csv/motorEffOut.csv");
+motorEff = rawMotorEff(2:end, 2:end);
+torqueBreakpoints = linspace(0,3.5,100);
+omegaBreakpoints = linspace(0,523.598775598299,100);
+
+% torqueBreakpoints = rawMotorEff(2:end,1);
+% omegaBreakpoints = rawMotorEff(1,2:end);
 
 % Extract time and speed columns
 distanceX = driveCycle(:, 1);
