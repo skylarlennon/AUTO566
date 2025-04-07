@@ -25,13 +25,21 @@ track_configs = [
                  "csv/elev_projected/Sonoma_elev_projected.csv"], ...
         'num_laps', 10, ...
         'stop_point', 395 ...
+    );
+    struct( ...
+        'name', "Test", ...
+        'file', ["csv/flat_projected/Test_flat_projected.csv", ...
+                 "csv/elev_projected/Test_elev_projected.csv"], ...
+        'num_laps', 10, ...
+        'stop_point', 395 ...
     )
 ];
 
 %% === Select Track ===
 track_number = 3;   % 1 = Detroit Streets
                     % 2 = Indianapolis Motor Speedway
-                    % 3 = Sonoma Raceway 
+                    % 3 = Sonoma Raceway
+                    % 4 = Test
 track_type = 2;     % 1 = Flat Projection
                     % 2 = Elevated Projection
 
@@ -52,7 +60,7 @@ stop_points = generate_stop_points(2*num_laps-1,lap_length,stop_point);
 
 %% Define Driving Strategy
 total_race_time = 35; % [minutes]           % [Edit based on track]
-accel_rate = 0.3; % [m/s^2]                % [Edit based on track]
+accel_rate = 0.4; % [m/s^2]                % [Edit based on track]
 decel_rate = 0.25; % [m/s^2]                % [Edit based on track]
 max_speed = 15; % [m/s]                     % [Edit based on vehicle]           
 
@@ -242,10 +250,10 @@ function drive_matrix = SimpleDriveStrategy(track_file, lap_length, num_laps, st
     drive_matrix = [position, y_interp, elev_interp, velocity, time_vector];
 
     % Save CSV local
-    % writematrix(drive_matrix, 'csv/drive_strategy.csv');
+    writematrix(drive_matrix, 'csv/drive_strategy.csv');
 
     % Save CSV for vehicle model
-    % writematrix(drive_matrix, '../../vehicle_modeling/drive_strategy.csv');
+    writematrix(drive_matrix, '../../vehicle_modeling/drive_strategy.csv');
 
     % Plot the results
     figure;

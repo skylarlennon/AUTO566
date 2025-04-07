@@ -120,3 +120,5 @@ $Transmission$ $Modeling$
 TODO
 - Have the drive strat select the track
 - have the track modeling generate the name of the track
+- todo: figure out why the extra tails on the time graph
+- figure out why the decel distance doesn't always work, making it stop on a dime. 

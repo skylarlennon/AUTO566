@@ -4,7 +4,7 @@
 clc;clear;close all;
 
 %% Select Track
-track_number = 3;   % 0 = Custom Track
+track_number = 0;   % 0 = Custom Track
                     % 1 = Detroit Streets
                     % 2 = Indianapolis Motor Speedway
                     % 3 = Sonoma Raceway
@@ -15,14 +15,16 @@ elev_params = [];
 is_circuit = -1;
 switch track_number
     case 0
-        track_name = "Input Track Name Here";
+        track_name = "Test";
         is_circuit = 1;
-        lap_length = 2000; % [Input lap length]
+        lap_length = 1440; % [Input lap length]
         elev_profile_type = 'sections';
         % elev_params = []; % [Input elev params]
-        elev_params = [0 500 -0.02;
-                500 1500 0.01;
-                1500 2000 0];
+        elev_params = [0 350 5/350;
+                350 490 0;
+                490 875 -5.75/385;
+                875 1350 0;
+                1350 1440 0.75/90];
     case 1
         track_name = "Detroit";
         is_circuit = 1;
@@ -49,7 +51,7 @@ end
 track_matrix = LinearTrackGenerator(lap_length, is_circuit, elev_profile_type, elev_params,track_name);
 
 %% Save Track Model to CSV locally and for drive strat
-if elev_profile_type == 'flat'
+if strcmp(elev_profile_type, 'flat')
     filenameLocal = sprintf('csv/flat_projected/%s_flat_projected.csv', track_name);
     filenamDriveStrat = sprintf('../drive_strat/csv/flat_projected/%s_flat_projected.csv',track_name);
     writematrix(track_matrix, filenameLocal);
