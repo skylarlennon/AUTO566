@@ -44,7 +44,7 @@ cdaf = airDensity*aeroDragCoeff;
 r_wheel = 0.3048;
 % TODO: Next model has non-static gear ratio
 Ndriving = 1; 
-Ndriven = 4;
+Ndriven = 7;
 GR = Ndriven/Ndriving;
 Spinloss = 0.1; % [N-m] TODO: Get better estimate & model of transmission losses
 maxBrakeForce = 400; %N
@@ -74,7 +74,7 @@ t_off = 1.15E-07;
 f_sw = 20000;
 
 % Motor (KDE Direct 7208XF)
-motorMaxTorque = 15;
+motorMaxTorque = 5;
 motorMaxPower = 2e3;
 MotorMaxSpeed = 2000/60*2*pi; % [radps]
 % TODO: Make this in agreement w the KDE Direct Motor

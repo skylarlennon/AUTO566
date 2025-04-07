@@ -22,7 +22,7 @@ This README will walk you through the entire project, allowing you to understand
 6. Tweak one variable within steps 1-4. 
 7. Repeat step 5.
 
-One very important thing to note is that a reverse-modeling strategy is employed. In reverse modeling, the input is the desired vehicle behavior-what we'll refer to as the drive cycle-which defines a speed profile of the vehicle. The drive cycle also encapsulates route (or racing line) the vehicle will drive, including turning and elevation changes. We have anticipated 3 potential courses for the '26 & '27 SEM including the streets of Detroit, the Indy Road Course, and the Sonoma Raceway, described below.
+One very important thing to note is that a reverse-modeling strategy is employed. In reverse modeling, the input is the desired vehicle behavior-what we'll refer to as the drive cycle-which defines a speed profile of the vehicle. The drive cycle also encapsulates the route (or racing line) the vehicle will drive, including turning and elevation changes. We have anticipated 3 potential courses for the '26 & '27 SEM including the streets of Detroit, the Indy Road Course, and the Sonoma Raceway, described below.
 
 ## TRACK MODELING
 We cannot model our vehicle's performance if we do not know the terrain upon which it will be driving. So, we begin with modeling the 3 tracks at which we anticipate the '26 & '27 SEM may be held. 
@@ -39,24 +39,37 @@ We cannot model our vehicle's performance if we do not know the terrain upon whi
 
 ![Sonoma Top View](media/sonoma_top_view.png)
 
+All three of these tracks will be modeled with two levels of complexity, giving us 6 total track models. 
 
-All three of these tracks will be modeled with three levels of complexity.
-
-The basic models, created from [linear_track_generator.m](/drive_cycle/track_modeling/linear_track_generator.m) only accounts for the distance traveled __along the track__ and will NOT account for elevation changes throughout the course. Thus, when used in the final simulation, we will only modeling longitudinal vehicle dynamics (think ΔX only). It's important to note that the 'distance along the track' is not equivalent to the apparent distance you would see viewing the track from above but rather is the absolute euclidean distance. 
-
+1. Flat Projection Models:
+- Created from [linear_track_generator.m](/drive_cycle/track_modeling/linear_track_generator.m), these models will only accounts for the distance traveled __along the track__ and will NOT account for elevation changes throughout the course. Thus, when used in the final simulation, we will only modeling longitudinal vehicle dynamics (think ΔX only).
 ![Flat Track SS Drive Cycle](media/flat_track_SS_DriveCycle.png)
+To generate these models, we will simply use the 'measure distance' function in google maps and trace a rough racing line along the center of the track to obtain both the lap length, and the distance to the location of the stop point according to the [SEM Rules](https://www.shellecomarathon.com/about/global-rules/_jcr_content/root/main/section/simple_copy_copy_143/link_list/links/item0.stream/1725262844182/58f0026a158591aab5df4789d7440c79c129c37d/shell-eco-marathon-2025-official-rules-chapter-i.pdf)
+This information along with the number of laps can then be input to [linear_track_generator.m](/drive_cycle/track_modeling/linear_track_generator.m) to generate the flat projection model. The default elevation profile type for this program is 'flat', which is what we will be using for the AUTO 566 project. However, if you'd like to explore simulating tracks with constant elevation changes, there are instuctions within the program explaining how to do so. 
 
-The intermediate models, created from [linearizeTrack.m](drive_cycle/track_modeling/linearizeTrack.m), will include both the distance along the track, and the courses' elevation changes (think ΔX & ΔZ). Thus, when used in the final simulation, we will still only be accounting for longitudinal vehicle dynamics, but we will also account for the varying road load as a function of the track's slope.
-
+2. Elevated Projection Models 
+- Created from [linearizeTrack.m](drive_cycle/track_modeling/linearizeTrack.m), these models will include both the distance along the track, and the courses' elevation changes (think ΔX & ΔZ). Thus, when used in the final simulation, we will still only be accounting for longitudinal vehicle dynamics, but we will also account for the varying road load as a function of the track's slope.
 ![PlaceHolder](media/linearizedTrackPlaceHolder.png)
 
-Our advanced track models will be 3D models, incorporating turns and elevation changes (think ΔX, ΔY, & ΔZ). Thus, when used in the final simulation, we will be accounting for both the longitudinal an lateral vehicle dynamics. More on this in the 'Vehicle Dynamics Modeling' Section.
+ For each track, a racing line will be automatically transcribed based on heuristics found in [this paper](TODO). We'll use the strategies described in the paper along with real GPS data for each track in order to generate the the model. The process of obtaining this GPS data is described below using the process of gaining GPS data for the Sonoma Raceway as an example:
 
-![Sonoma](media/Sonoma_Raceway_Animation.gif)
+1. [Download Google Earth Pro](https://www.google.com/earth/about/versions/#earth-pro)
+2. Navigate to the track
+![GoogleEarthSonomamedia](media/googleEarthSonoma.gif)
+3. Use the 'New Placemark' button to place points around the track
+![SonomaPlaceMarks](media/sonomaWPlaceMarks.png)
+Make sure to put the placemarks at the center of the track and to place the first and last placemark at the location of the start-finish line
+4. Export these points to a .kml file
+![SaveSonomatoKML](media/saveSonomaToKML.png)
+5. Navigate to [GPSVisualizer](https://www.gpsvisualizer.com/convert_input)
+![GPSVisualizer](media/GPSVisualizer.png)
+6. Upload track .kml file, and configure output
+![ConfiguredGPSVisualizer](media/GPSVisualizer_Configured.png)
+7. Click 'Convert' and Download the zip file
+![ZipDownload](media/GPSVisualizerOutput.png)
+8. Upzip and move to [drive_cycle/track_modeling/csv/raw](drive_cycle/track_modeling/csv/raw/)
+9. Rename file with following convention: TrackName_raw.csv to be compatible with [linearizeTrack.m](drive_cycle/track_modeling/linearizeTrack.m)
 
-For each track, a racing line will be manualy transcribed based on heuristics found in [this paper](TODO). We'd like to use the strategies described in the paper along with real GPS data for each track in order to generate the the track model.
-
-[TODO]: translate the instructions in [this doc](https://docs.google.com/document/d/1OqPbcJZFi8pWBwTCyKMTRlEqdDSNF1haZ38S6mFxTT0/edit?tab=t.0) to fit within the context of this project
 
 
 ## DRIVING STRATEGY
@@ -75,15 +88,7 @@ For each track, a racing line will be manualy transcribed based on heuristics fo
 **Linearized Track Strategies:**
 - Section off PnG & downhill coasting
 - Optimize PnG with this consideration
-- Transition between PnG & coast (transition at max speed? min speed?)
-- 
-
-
-**Non-Linear Track Stragegies**
-- Section off into PnG, downhill coasting, and turning sections
-- Optimizes both speed and turns for max efficiency
-- Simplified model of additional load based on turning. (no tire losses, only additional load? Force balance based on turning = centripetal acceleration)
-
+- Transition between PnG & coast (transition at max speed? min speed?) [todo: cite that paper]
 
 ## VEHICLE MODELING
 $Vehicle$ $Dynamics$ $Modeling$
@@ -112,3 +117,8 @@ $Transmission$ $Modeling$
 - Explicit references (hyperlinks) to the documents which are cited.
 - ME 565 battery model 
 
+TODO
+- Have the drive strat select the track
+- have the track modeling generate the name of the track
+- todo: figure out why the extra tails on the time graph
+- figure out why the decel distance doesn't always work, making it stop on a dime. 

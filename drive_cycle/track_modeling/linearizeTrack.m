@@ -1,8 +1,10 @@
 clear; clc; close all;
 
-trackData = importdata('csv/sonoma.csv');   %import raw csv from SwiftNav
+track_name = 'Sonoma';
+track_path = sprintf('csv/raw/%s_raw.csv',track_name);
+trackData = importdata(track_path);     %import raw csv from SwiftNav
 trackData = trackData.data;             %cut off the header
-trackData = trackData(1500:18280, :);   %cut the data so there is no overlap
+trackData = trackData(1500:18280, :);   % (TODO: Get from google earth & delete) cut the data so there is no overlap
 
 lat = trackData(:, 2);
 lon = trackData(:, 3);
@@ -19,13 +21,8 @@ z = -smooth(z, 5);  %the elevation in the raw GPS log is inverted. fix it
 %y = downsample(y, 20);
 %z = downsample(z, 20);
 
-scatter3(x, y, z);      %plot the raw GPS trace in meters
-xlabel('x'); ylabel('y'); zlabel('z');
-
 rawTrack = [x, y, z];
-
 totalDist = 0;
-%distLog = [];
 subsampledTrack = rawTrack(1, :);
 linearizedTrack = [0, 0, 0];
 
@@ -39,21 +36,32 @@ for i = 2:length(rawTrack)
    end
 end
 
-%figure;
-%scatter3(subsampledTrack(:, 1), subsampledTrack(:, 2), subsampledTrack(:, 3));
+%% Save Outputs
+% Local
+Full3D_Local = sprintf('csv/full_3D/%s_3D.csv',track_name);
+Projected_Local = sprintf('csv/elev_projected/%s_elev_projected.csv',track_name);
 
-% Save local copies of the output
-csvwrite('csv/sonomaMeters.csv', subsampledTrack);
-csvwrite('csv/sonomaLinearized.csv', linearizedTrack);
+csvwrite(Full3D_Local, subsampledTrack);
+csvwrite(Projected_Local, linearizedTrack);
 
-% Save copies to be combined with the driving strategy
-csvwrite('../drive_strat/csv/sonomaMeters.csv', subsampledTrack);
-csvwrite('../drive_strat/csv/sonomaLinearized.csv', linearizedTrack);
+% For Drive Strat
+Full3D_DriveStrat = sprintf('../drive_strat/csv/full_3D/%s_3D.csv',track_name);
+Projected_DriveStrat = sprintf('../drive_strat/csv/elev_projected/%s_elev_projected.csv',track_name);
 
-figure;
+csvwrite(Full3D_DriveStrat, subsampledTrack);
+csvwrite(Projected_DriveStrat, linearizedTrack);
+
+%% Plot Results
+figure(1)
+scatter3(x, y, z);      %plot the raw GPS trace in meters
+xlabel('x'); ylabel('y'); zlabel('z');
+titleText = sprintf('%s Raw GPS Racing Line in Meters',track_name)
+title(titleText);
+
+figure(2);
 plot(linearizedTrack(:, 1), linearizedTrack(:, 3));
 xlabel('Distance along track in m');
 ylabel('Relative elevation in m');
+titleText = sprintf('%s Elevated Projected Track',track_name)
+title(titleText);
 grid on;
-
-lap_length_mi = totalDist/1609
