@@ -36,7 +36,7 @@ track_configs = [
 ];
 
 %% === Select Track ===
-track_number = 3;   % 1 = Detroit Streets
+track_number = 1;   % 1 = Detroit Streets
                     % 2 = Indianapolis Motor Speedway
                     % 3 = Sonoma Raceway
                     % 4 = Test
@@ -253,7 +253,7 @@ function drive_matrix = SimpleDriveStrategy(track_file, lap_length, num_laps, st
     writematrix(drive_matrix, 'csv/drive_strategy.csv');
 
     % Save CSV for vehicle model
-    writematrix(drive_matrix, '../../vehicle_modeling/drive_strategy.csv');
+    writematrix(drive_matrix, '../../vehicle_modeling/csv/drive_strategy.csv');
 
     % Plot the results
     figure;

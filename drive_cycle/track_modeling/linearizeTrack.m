@@ -1,21 +1,27 @@
 clear; clc; close all;
 
-track_name = 'Sonoma';
+track_name = 'Detroit';
 track_path = sprintf('csv/raw/%s_raw.csv',track_name);
 trackData = importdata(track_path);     %import raw csv from SwiftNav
 trackData = trackData.data;             %cut off the header
-trackData = trackData(1500:18280, :);   % (TODO: Get from google earth & delete) cut the data so there is no overlap
+% trackData = trackData(1500:18280, :);   % (TODO: Get from google earth & delete) cut the data so there is no overlap
 
-lat = trackData(:, 2);
-lon = trackData(:, 3);
-elev = trackData(:, 4);
+% lat = trackData(:, 2);
+% lon = trackData(:, 3);
+% elev = trackData(:, 4);
+
+lat = trackData(:, 1);
+lon = trackData(:, 2);
+elev = trackData(:, 3);
 
 %project latitude and longitude onto the globe to convert to meters
 [y, x, z] = geodetic2ned(lat, lon, elev, lat(1), lon(1), elev(1), referenceEllipsoid('GRS80','m'));
+elevSmoothFactor = 1000; % larger = smoother elevation profile
 
 x = smooth(x, 5);   %basic smoothing
 y = smooth(y, 5);
-z = -smooth(z, 5);  %the elevation in the raw GPS log is inverted. fix it
+z = -smooth(z, elevSmoothFactor);  %the elevation in the raw GPS log is inverted. fix it
+
 
 %x = downsample(x, 20);
 %y = downsample(y, 20);
