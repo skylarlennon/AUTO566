@@ -122,3 +122,12 @@ TODO
 - have the track modeling generate the name of the track
 - todo: figure out why the extra tails on the time graph
 - figure out why the decel distance doesn't always work, making it stop on a dime. 
+- Show losses as a function of time for everything that looses power. 
+- Have separate files for all of the parameters. 
+- Why don't ocv and Vt match? Irrelevant now? 
+- Create animation of the car driving over the track
+    - Live and static graphs
+
+
+- THINGS TO DO IN FUTURE
+    - environment file: wind direction as a random function of time. 
