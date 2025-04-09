@@ -4,25 +4,25 @@ clear;
 close all;
 
 %% Load Driving Data
-tire_radius = 0.554 / 2;
-csv_path = "wsc_2025_at_28.0556.csv";
-data = readtable(csv_path);
-
-tau = 0;
-omega = 0;
-Energy = 0;
-CdA = 0.070;
-mass = 250;
-
-for i = 1:length(data.start_x)
-    V = data.start_v(i);
-    F = 0.5 * CdA * 1.225 * V^2 + 30;
-    E = F * V * data.step_time(i);
-
-    tau = cat(1, tau, F * tire_radius);
-    omega = cat(1, omega, V / tire_radius);
-    Energy = cat(1, Energy, E);
-end
+% tire_radius = 0.554 / 2;
+% csv_path = "wsc_2025_at_28.0556.csv";
+% data = readtable(csv_path);
+% 
+% tau = 0;
+% omega = 0;
+% Energy = 0;
+% CdA = 0.070;
+% mass = 250;
+% 
+% for i = 1:length(data.start_x)
+%     V = data.start_v(i);
+%     F = 0.5 * CdA * 1.225 * V^2 + 30;
+%     E = F * V * data.step_time(i);
+% 
+%     tau = cat(1, tau, F * tire_radius);
+%     omega = cat(1, omega, V / tire_radius);
+%     Energy = cat(1, Energy, E);
+% end
 
 %% Figure 1: Motor Efficiency Map (From Power Loss Model)
 
@@ -35,8 +35,21 @@ torque_nm = linspace(0, 3.5, 100);       % Torque in Nm
 omega_grid = speed_grid_rpm * 2 * pi / 60;  % rad/s
 
 % Instantiate your motor (same constants from datasheet)
-motor = Motor(0.0707, 0.0707, 38, 0.113, 1.0, 0.3, ...
-              -0.0006, -0.0006, 0.0039, 0, -0.0001, 23);
+kt = 0.0707;
+ke =  0.0707;
+Is =  38;
+Ra_t = 0.113;
+hy = 1.0;
+l_ec = 0.3;
+alpha_kt = -0.0006;
+alpha_ke = -0.0006;
+alpha_r = 0.0039;
+alpha_hy = 0;
+alpha_ec = -0.0001;
+T_init = 23;
+
+motor = Motor(kt,ke,Is, Ra_t, hy, l_ec, ...
+              alpha_kt, alpha_ke, alpha_r, alpha_hy, alpha_ec, T_init);
 
 % Initialize power values
 P_out = torque_grid .* omega_grid;
@@ -71,41 +84,13 @@ title('Motor Efficiency Map (From Power Loss Model)');
 grid on;
 
 %% Save to csv
-outputFileName = "../csv/motorEffOut.csv"
+outputFileName = "../csv/motorEffOut.csv";
 outputMatrix = zeros(length(speed_rpm)+1, length(torque_nm)+1);
 outputMatrix(2:end,2:end) = eta_map;
 outputMatrix(2:end,1) = torque_nm;
 outputMatrix(1,2:end) = omega;
 zeroIdx = (outputMatrix == 0);
-outputMatrix(zeroIdx) = 0.25;
+outputMatrix(zeroIdx) = 1e-4; %to avoid div/0
 writematrix(outputMatrix,outputFileName);
 
-%% Figure 2: I²R Power Loss Map (Resistive Losses Only)
-
-% Reuse speed and torque grid
-% speed_rpm = linspace(0, 5000, 100);
-% torque_nm = linspace(0, 3.5, 100);
-% [speed_grid_rpm, torque_grid] = meshgrid(speed_rpm, torque_nm);
-% omega_grid = speed_grid_rpm * 2 * pi / 60;
-% 
-% % Initialize resistive loss matrix
-% P_loss_R = zeros(size(omega_grid));
-% 
-% for i = 1:numel(omega_grid)
-%     P_loss_R(i) = motor.get_power_loss_resistive(torque_grid(i));
-% end
-% 
-% % Plot contour
-% figure(2); clf;
-% contourf(speed_grid_rpm, torque_grid, P_loss_R, 10, 'ShowText', 'on');
-% colormap(parula);
-% colorbar;
-% title('I²R Losses');
-% xlabel('RPM');
-% ylabel('Torque (N·m)');
-% c = colorbar;
-% c.Label.String = 'Power Loss (W)';
-% grid on;
-% 
-% 
-% 
+fprintf("Saved motor efficiency data to %s\n", outputFileName);

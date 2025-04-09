@@ -56,11 +56,15 @@ if strcmp(elev_profile_type, 'flat')
     filenamDriveStrat = sprintf('../drive_strat/csv/flat_projected/%s_flat_projected.csv',track_name);
     writematrix(track_matrix, filenameLocal);
     writematrix(track_matrix, filenamDriveStrat);
+    fprintf("Saved track data to %s\n", filenameLocal);
+    fprintf("Saved track data to %s\n", filenamDriveStrat);
 else
     filenameLocal = sprintf('csv/elev_projected/%s_elev_projected.csv', track_name);
     filenamDriveStrat = sprintf('../drive_strat/csv/elev_projected/%s_elev_projected.csv',track_name);
     writematrix(track_matrix, filenameLocal);
     writematrix(track_matrix, filenamDriveStrat);
+    fprintf("Saved track data to %s\n", filenameLocal);
+    fprintf("Saved track data to %s\n", filenamDriveStrat);
 end
 
 %% LinearTrackGenerator Function

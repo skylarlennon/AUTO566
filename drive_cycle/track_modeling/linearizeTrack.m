@@ -22,7 +22,6 @@ x = smooth(x, 5);   %basic smoothing
 y = smooth(y, 5);
 z = -smooth(z, elevSmoothFactor);  %the elevation in the raw GPS log is inverted. fix it
 
-
 %x = downsample(x, 20);
 %y = downsample(y, 20);
 %z = downsample(z, 20);
@@ -57,17 +56,20 @@ Projected_DriveStrat = sprintf('../drive_strat/csv/elev_projected/%s_elev_projec
 csvwrite(Full3D_DriveStrat, subsampledTrack);
 csvwrite(Projected_DriveStrat, linearizedTrack);
 
+fprintf("Saved 3D track data to: \n%s\n%s\n\n", Full3D_Local,Full3D_DriveStrat);
+fprintf("Saved elevated projection track data to: \n%s\n%s\n", Projected_Local,Projected_DriveStrat);
+
 %% Plot Results
 figure(1)
 scatter3(x, y, z);      %plot the raw GPS trace in meters
 xlabel('x'); ylabel('y'); zlabel('z');
-titleText = sprintf('%s Raw GPS Racing Line in Meters',track_name)
+titleText = sprintf('%s Raw GPS Racing Line in Meters',track_name);
 title(titleText);
 
 figure(2);
 plot(linearizedTrack(:, 1), linearizedTrack(:, 3));
 xlabel('Distance along track in m');
 ylabel('Relative elevation in m');
-titleText = sprintf('%s Elevated Projected Track',track_name)
+titleText = sprintf('%s Elevated Projected Track',track_name);
 title(titleText);
 grid on;
