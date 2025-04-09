@@ -2,7 +2,7 @@
 %TODO: ADD DESCRIPTION HERE
 clc;clear;close all
 %% Load Model Parameters
-DriveCycle;
+LoadDriveCycle;
 
 ConstantsEnvironment;
 ConstantsVehicleBody;
@@ -42,3 +42,5 @@ PlotPowerAndEnergy;
 
 %% Plot Driveline Efficiencies Over Time
 PlotDrivelineEff;
+
+%% Plot Total Vehicle Efficiency Over Time
