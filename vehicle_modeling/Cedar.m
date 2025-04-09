@@ -39,3 +39,6 @@ PlotTractiveForces;
 
 %% Plot Output Power & Energy Over Time
 PlotPowerAndEnergy;
+
+%% Plot Driveline Efficiencies Over Time
+PlotDrivelineEff;

@@ -21,7 +21,16 @@ ylim([0 motorMaxTorque*1.05])
 titleString = sprintf('Torque Speed Data for %.2f Nm, %d kW Motor',motorMaxTorque, motorMaxPower/1e3);
 title(titleString)
 hold on
+
+% Motor Efficiency Contour
+contourf(omegaBreakpoints, torqueBreakpoints, motorEff, ...
+         [0.5 0.6 0.7 0.75 0.8 0.85 0.9 0.93 0.95], ...
+         'ShowText', 'on', 'LineColor', 'k');
+colormap(turbo); 
+colorbar;
+% caxis([0.5 0.95]);
+
 plot(envelopeSpeed, envelopeTorque, 'LineWidth', 2, 'DisplayName', 'Torque-Speed Envelope'); % The envelope line
 scatter(motorSpeedOut,motorTorqueOut)
 hold off
-legend('Torque-Speed Envelope', 'Torque-Speed Operating Points')
+legend('Motor Efficiency Contours','Torque-Speed Envelope', 'Torque-Speed Operating Points')
