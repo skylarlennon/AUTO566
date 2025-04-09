@@ -2,19 +2,19 @@
 %TODO: ADD DESCRIPTION HERE
 clc;clear;close all
 %% Load Model Parameters
-Drive_Cycle;
-Environment;
-Vehicle_Body;
-Battery;
-Inverter;
-Motor;
-Transmission;
-Accessory_Load;
-Constants;
+DriveCycle;
+
+ConstantsEnvironment;
+ConstantsVehicleBody;
+ConstantsBattery;
+ConstantsInverter;
+ConstantsMotor;
+ConstantsTransmission;
+ConstantsAccessoryLoad;
+ConstantsMisc;
 
 %% Simulate
 sim('CedarSim.slx')
-
 GatherResults;
 
 %% Important Stats
