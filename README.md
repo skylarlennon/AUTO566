@@ -118,17 +118,15 @@ $Transmission$ $Modeling$
 - ME 565 battery model 
 
 TODO
-- todo: figure out why the extra tails on the time graph
-- figure out why the decel distance doesn't always work, making it stop on a dime. 
-- Show losses as a function of time for everything that looses power. 
 - Why don't ocv and Vt match? Irrelevant now? 
 - Create animation of the car driving over the track
     - Live and static graphs
-- Not sure that driveline losses propogate all the way back. 
 - Create histogram of the motor eff points
-- Create plot that shows efficiency as a percent over the whole course
 - Create plot of total vehicle efficiency 
-- Make sure that the power demand at the 
+- New plot for power losses
+- New plot for total energy losses
+- Iterate through gear ratio's
+- Generate ideal motor data
 - Make a 'next steps' section 
     - 3D modeling 
     - Max velocity during turns

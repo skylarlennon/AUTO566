@@ -44,3 +44,4 @@ PlotPowerAndEnergy;
 PlotDrivelineEff;
 
 %% Plot Total Vehicle Efficiency Over Time
+PlotTotalVehicleEfficiency;

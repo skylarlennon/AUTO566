@@ -59,7 +59,7 @@ accel_from_stop_rate = 0.4; % [m/s^2]       % [Edit based on track]
 decel_to_stop_rate = 0.25; % [m/s^2]        % [Edit based on track]
 pulse_accel_rate = 0.5; % [m/s^2]           % [Edit based on track]
 deltaV = 2; % [m/s]                         % [Edit based on track]
-maxVelocity = 25; % [m/s]                   % [Edit based on vehicle] 
+maxVelocity = 17; % [m/s]                   % [Edit based on vehicle] (automate) 
 
 
 %% === Load Vehicle Parameters ===
@@ -111,9 +111,9 @@ function drive_matrix = PulseAndGlideStrategy(track_data, lap_length, num_laps, 
     end
     Vs1 = (-B + sqrt(discriminant)) / (2 * A);
     Vs2 = (-B - sqrt(discriminant)) / (2 * A);
-    if Vs1 > 0
+    if (Vs1 > 0 && Vs1 < maxVelocity) && (Vs1 < Vs2)
         Vs = Vs1;
-    elseif Vs2 > 0
+    elseif Vs2 > 0 && Vs2 < maxVelocity
         Vs = Vs2;
     else
         error('Cannot find valid steady-state velocity. Adjust parameters.');
