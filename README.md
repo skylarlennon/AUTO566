@@ -125,3 +125,13 @@ TODO
 - Create animation of the car driving over the track
     - Live and static graphs
 - Not sure that driveline losses propogate all the way back. 
+- Create histogram of the motor eff points
+- Create plot that shows efficiency as a percent over the whole course
+- Create plot of total vehicle efficiency 
+- Make sure that the power demand at the 
+- Make a 'next steps' section 
+    - 3D modeling 
+    - Max velocity during turns
+    - More advanced algorithms for determining optimal speed
+        - PnG, but iterate through different values for the acc from stop, dec to stop, and pulse acc, to get all of the possible options, then cost function is total energy consumed, taking into consideration the powertrain efficiency, and the contours of the track 
+- 

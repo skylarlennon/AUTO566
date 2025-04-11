@@ -1,28 +1,27 @@
 % 4-10 Transmission Params
-clear all
-close all
+clear all; close all; clear all;
 
 n_chain= 54; %number of teeth on chain ring (Update)
 n_cassette= [14 16 18 21 24 28]; %number of teeth on cassette gears (% Shimano MF-TZ510-6-CP Multi-Speed Freewheel)
 gear_ratios= n_cassette./n_chain; 
 torque_ratios= 1./gear_ratios;
 
-shifting= .95; %derailleur losses
-
 %load motor
+run("../ConstantsMotor.m");
+torqueBreakpoints = rawMotorEff(2:end,1);
+omegaBreakpoints = rawMotorEff(1,2:end);
 
-%sample data (Update to real)
-motor_speed = linspace(0, 5000, 50); % RPM
-motor_torque = linspace(0, 100, 50); % Nm
+motor_speed = omegaBreakpoints; % radps
+motor_torque = torqueBreakpoints; % Nm
 % Create or load motor efficiency map
-if ~exist('motor_efficiency_map', 'var')
-    % Sample efficiency map (normally from motor datasheet)
-    [X, Y] = meshgrid(motor_speed, motor_torque);
-    motor_efficiency_map = 0.75 + 0.2 * exp(-((X-2500).^2/1e6 + (Y-50).^2/500));
-    % Efficiency drops at extremes of operation range
-    motor_efficiency_map(X < 500 | X > 4500 | Y < 10 | Y > 90) = ...
-        motor_efficiency_map(X < 500 | X > 4500 | Y < 10 | Y > 90) * 0.7;
-end
+% if ~exist('motor_efficiency_map', 'var')
+%     % Sample efficiency map (normally from motor datasheet)
+%     [X, Y] = meshgrid(motor_speed, motor_torque);
+%     motor_efficiency_map = 0.75 + 0.2 * exp(-((X-2500).^2/1e6 + (Y-50).^2/500));
+%     % Efficiency drops at extremes of operation range
+%     motor_efficiency_map(X < 500 | X > 4500 | Y < 10 | Y > 90) = ...
+%         motor_efficiency_map(X < 500 | X > 4500 | Y < 10 | Y > 90) * 0.7;
+% end
 
 % Calculate wheel speed and torque for each gear
 num_gears = length(gear_ratios);
@@ -44,10 +43,26 @@ for g = 1:num_gears
     for s = 1:length(motor_speed)
         for t = 1:length(motor_torque)
             % Total efficiency = motor efficiency * transmission efficiency
-            efficiency_per_gear(s, t, g) = motor_efficiency_map(t, s) * transmission_efficiency(g);
+            efficiency_per_gear(s, t, g) = transmission_efficiency(g);
         end
     end
 end
+
+
+for i = length(n_cassette)
+    gear_ratio = torque_ratios(i);
+    efficiency_at_ratio = efficiency_per_gear(:,:,gear_ratio);
+    
+    [TORQUE, SPEED] = meshgrid(motor_torque,motor_speed);
+     
+    figure
+    contour(SPEED, TORQUE, efficiency_at_ratio)
+    xlabel('Speed (rad/s)')
+    ylabel('Torque (N-m)')
+    titleText = sprintf("Transmission Efficiency Map for GR = %s", string(gear_ratio));
+    title(titleText)
+end
+
 
 % Find optimal gear for each speed-torque combination
 [max_efficiency, optimal_gear] = max(efficiency_per_gear, [], 3);
