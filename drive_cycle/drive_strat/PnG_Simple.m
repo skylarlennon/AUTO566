@@ -55,12 +55,11 @@ stop_points = generate_stop_points(2*num_laps-1,lap_length,stop_point);
 
 %% Define Driving Strategy
 total_race_time = 35; % [minutes]           % [Edit based on track]
-accel_from_stop_rate = 0.4; % [m/s^2]       % [Edit based on track]
-decel_to_stop_rate = 0.25; % [m/s^2]        % [Edit based on track]
-pulse_accel_rate = 0.5; % [m/s^2]           % [Edit based on track]
-deltaV = 2; % [m/s]                         % [Edit based on track]
-maxVelocity = 17; % [m/s]                   % [Edit based on vehicle] (automate) 
-
+accel_from_stop_rate = 0.3; % [m/s^2]       % [Edit based on track]
+decel_to_stop_rate = 0.3; % [m/s^2]        % [Edit based on track]
+pulse_accel_rate = 0.1; % [m/s^2]           % [Edit based on track]
+deltaV = 1; % [m/s]                         % [Edit based on track]
+maxVelocity = 17; % [m/s]                   % [Edit based on vehicle] 
 
 %% === Load Vehicle Parameters ===
 run("../../vehicle_modeling/ConstantsVehicleBody.m");
@@ -69,10 +68,256 @@ run("../../vehicle_modeling/ConstantsEnvironment.m");
 
 road_load_fn = @(v) (Crr * massVeh * gravity + 0.5 * rho * Cd * Af * v.^2) / massVeh;
 
-drive_matrix = PulseAndGlideStrategy(track_data, lap_length, num_laps, stop_points, total_race_time, accel_from_stop_rate, decel_to_stop_rate, pulse_accel_rate, road_load_fn, deltaV, maxVelocity);
+drive_matrix = PulseAndGlideStrategy(track_data, lap_length, num_laps, stop_points, total_race_time, accel_from_stop_rate, decel_to_stop_rate, pulse_accel_rate, road_load_fn, deltaV);
+% TODO: Ensure that it doesn't exceed the max velocity
 
-function drive_matrix = PulseAndGlideStrategy(track_data, lap_length, num_laps, stop_points, total_race_time, accel_from_stop_rate, decel_to_stop_rate, pulse_accel_rate, road_load_fn, deltaV, maxVelocity)
-    % Load track data
+
+%% WORKING, DOESNT STOOP AT END
+% function drive_matrix = PulseAndGlideStrategy(track_data, lap_length, num_laps, stop_points, total_race_time, accel_from_stop_rate, decel_to_stop_rate, pulse_accel_rate, road_load_fn, deltaV)
+%     % Load track data
+%     x_dist = track_data(:,1);
+%     y_dist = track_data(:,2);
+%     elev = track_data(:,3);
+% 
+%     n_points = length(track_data(:,1));
+%     x_dist_full = zeros(n_points * num_laps, 1);
+%     y_dist_full = zeros(n_points * num_laps, 1);
+%     elev_full = zeros(n_points * num_laps, 1);
+% 
+%     for i = 0:(num_laps-1)
+%         idx = (1:n_points) + i * n_points;
+%         x_dist_full(idx) = x_dist + i * lap_length;
+%         y_dist_full(idx) = y_dist;
+%         elev_full(idx) = elev;
+%     end
+% 
+%     [x_dist_full, unique_idx] = unique(x_dist_full, 'stable');
+%     y_dist_full = y_dist_full(unique_idx);
+%     elev_full = elev_full(unique_idx);
+% 
+%     total_distance = num_laps * lap_length;
+%     dt = 0.1; % seconds
+% 
+%     % Iteratively solve for Vs that ends at zero velocity at total_distance in desired time
+%     Vs_guess = total_distance / (total_race_time * 60); % Initial guess
+%     tolerance = 1.0; % seconds
+%     max_iterations = 20;
+%     iter = 0;
+%     final_time_error = Inf;
+% 
+%     while abs(final_time_error) > tolerance && iter < max_iterations
+%         iter = iter + 1;
+% 
+%         v_high = Vs_guess + deltaV;
+%         v_low = Vs_guess - deltaV;
+% 
+%         position = 0;
+%         time = 0;
+%         velocity = 0;
+% 
+%         pos_arr = [];
+%         vel_arr = [];
+%         time_arr = [];
+% 
+%         stop_idx = 1;
+%         coast_phase = true;
+%         accelerating_from_stop = true;
+% 
+%         while position < total_distance || velocity > 0.05
+%             if stop_idx <= length(stop_points)
+%                 dist_to_stop = stop_points(stop_idx) - position;
+%             else
+%                 dist_to_stop = total_distance - position; % treat final stop at finish line
+%             end
+% 
+%             decel_to_stop_dist = v_low^2 / (2 * decel_to_stop_rate);
+%             if dist_to_stop < decel_to_stop_dist
+%                 coast_phase = true;
+%                 v_target = 0;
+%             elseif coast_phase
+%                 v_target = v_low;
+%             else
+%                 v_target = v_high;
+%             end
+% 
+%             if coast_phase
+%                 F_load = road_load_fn(velocity);
+%                 acc = -F_load;
+%             elseif accelerating_from_stop
+%                 acc = accel_from_stop_rate;
+%             else
+%                 acc = pulse_accel_rate;
+%             end
+% 
+%             velocity = velocity + acc * dt;
+%             velocity = max(min(velocity, v_high), 0);
+% 
+%             if coast_phase && velocity <= v_low
+%                 coast_phase = false;
+%                 accelerating_from_stop = false;
+%             elseif ~coast_phase && velocity >= v_high
+%                 coast_phase = true;
+%             end
+% 
+%             position = position + velocity * dt;
+%             time = time + dt;
+% 
+%             pos_arr(end+1,1) = position;
+%             vel_arr(end+1,1) = velocity;
+%             time_arr(end+1,1) = time;
+% 
+%             if velocity <= 0.05 && dist_to_stop < 1
+%                 stop_idx = stop_idx + 1;
+%                 accelerating_from_stop = true;
+%             end
+%         end
+% 
+%         final_time_error = time - total_race_time * 60;
+%         Vs_guess = Vs_guess + 0.05 * sign(final_time_error); % Adjust guess directionally
+%         fprintf("Total Distance Traveled:\t%.4f\nTotal Distance:\t%.4f\n\n",position,lap_length*num_laps)
+%     end
+% 
+%     y_interp = interp1(x_dist_full, y_dist_full, pos_arr, 'linear', 'extrap');
+%     elev_interp = interp1(x_dist_full, elev_full, pos_arr, 'linear', 'extrap');
+% 
+%     drive_matrix = [pos_arr, y_interp, elev_interp, vel_arr, time_arr];
+% 
+%     writematrix(drive_matrix, 'csv/drive_strategy.csv');
+%     writematrix(drive_matrix, '../../vehicle_modeling/csv/drive_strategy.csv');
+% 
+%     figure;
+%     plot(pos_arr, vel_arr, 'b-', 'LineWidth', 2);
+%     xlabel('Distance (m)');
+%     ylabel('Velocity (m/s)');
+%     title('Pulse-and-Glide Velocity Profile');
+%     grid on;
+% end
+
+
+%% DOESN'T STOP AT INTERMEDIATE POINTS, AND RAPID STOP AT END
+% function drive_matrix = PulseAndGlideStrategy(track_data, lap_length, num_laps, stop_points, total_race_time, accel_from_stop_rate, decel_to_stop_rate, pulse_accel_rate, road_load_fn, deltaV)
+%     x_dist = track_data(:,1);
+%     y_dist = track_data(:,2);
+%     elev = track_data(:,3);
+% 
+%     n_points = length(track_data(:,1));
+%     x_dist_full = zeros(n_points * num_laps, 1);
+%     y_dist_full = zeros(n_points * num_laps, 1);
+%     elev_full = zeros(n_points * num_laps, 1);
+% 
+%     for i = 0:(num_laps-1)
+%         idx = (1:n_points) + i * n_points;
+%         x_dist_full(idx) = x_dist + i * lap_length;
+%         y_dist_full(idx) = y_dist;
+%         elev_full(idx) = elev;
+%     end
+% 
+%     [x_dist_full, unique_idx] = unique(x_dist_full, 'stable');
+%     y_dist_full = y_dist_full(unique_idx);
+%     elev_full = elev_full(unique_idx);
+% 
+%     total_distance = num_laps * lap_length;
+%     dt = 0.1; % seconds
+% 
+%     Vs_guess = total_distance / (total_race_time * 60); % Initial guess
+%     tolerance = 1.0; % seconds
+%     max_iterations = 20;
+%     iter = 0;
+%     final_time_error = Inf;
+% 
+%     while abs(final_time_error) > tolerance && iter < max_iterations
+%         iter = iter + 1;
+% 
+%         v_high = Vs_guess + deltaV;
+%         v_low = Vs_guess - deltaV;
+% 
+%         position = 0;
+%         time = 0;
+%         velocity = 0;
+% 
+%         pos_arr = [];
+%         vel_arr = [];
+%         time_arr = [];
+% 
+%         stop_idx = 1;
+%         coast_phase = true;
+%         accelerating_from_stop = true;
+% 
+%         while (position + velocity * dt) < total_distance || velocity > 0.05
+%             if stop_idx <= length(stop_points)
+%                 dist_to_stop = stop_points(stop_idx) - position;
+%             else
+%                 dist_to_stop = total_distance - position;
+%             end
+% 
+%             decel_to_stop_dist = v_low^2 / (2 * decel_to_stop_rate);
+%             if dist_to_stop < decel_to_stop_dist
+%                 coast_phase = true;
+%                 v_target = 0;
+%             elseif coast_phase
+%                 v_target = v_low;
+%             else
+%                 v_target = v_high;
+%             end
+% 
+%             if coast_phase
+%                 F_load = road_load_fn(velocity);
+%                 acc = -F_load;
+%             elseif accelerating_from_stop
+%                 acc = accel_from_stop_rate;
+%             else
+%                 acc = pulse_accel_rate;
+%             end
+% 
+%             velocity = velocity + acc * dt;
+%             velocity = max(min(velocity, v_high), 0);
+% 
+%             if coast_phase && velocity <= v_low
+%                 coast_phase = false;
+%                 accelerating_from_stop = false;
+%             elseif ~coast_phase && velocity >= v_high
+%                 coast_phase = true;
+%             end
+% 
+%             if position + velocity * dt > total_distance
+%                 velocity = (total_distance - position) / dt;
+%             end
+% 
+%             position = position + velocity * dt;
+%             time = time + dt;
+% 
+%             pos_arr(end+1,1) = position;
+%             vel_arr(end+1,1) = velocity;
+%             time_arr(end+1,1) = time;
+% 
+%             if velocity <= 0.05 && dist_to_stop < 1
+%                 stop_idx = stop_idx + 1;
+%                 accelerating_from_stop = true;
+%             end
+%         end
+% 
+%         final_time_error = time - total_race_time * 60;
+%         Vs_guess = Vs_guess + 0.05 * sign(-final_time_error);
+%         fprintf("Total Distance Traveled:\t%.4f\nTotal Distance:\t%.4f\n\n",position,lap_length*num_laps)
+%     end
+% 
+%     y_interp = interp1(x_dist_full, y_dist_full, pos_arr, 'linear', 'extrap');
+%     elev_interp = interp1(x_dist_full, elev_full, pos_arr, 'linear', 'extrap');
+% 
+%     drive_matrix = [pos_arr, y_interp, elev_interp, vel_arr, time_arr];
+% 
+%     writematrix(drive_matrix, 'csv/drive_strategy.csv');
+%     writematrix(drive_matrix, '../../vehicle_modeling/csv/drive_strategy.csv');
+% 
+%     figure;
+%     plot(pos_arr, vel_arr, 'b-', 'LineWidth', 2);
+%     xlabel('Distance (m)');
+%     ylabel('Velocity (m/s)');
+%     title('Pulse-and-Glide Velocity Profile');
+%     grid on;
+% end
+
+function drive_matrix = PulseAndGlideStrategy(track_data, lap_length, num_laps, stop_points, total_race_time, accel_from_stop_rate, decel_to_stop_rate, pulse_accel_rate, road_load_fn, deltaV)
     x_dist = track_data(:,1);
     y_dist = track_data(:,2);
     elev = track_data(:,3);
@@ -95,92 +340,99 @@ function drive_matrix = PulseAndGlideStrategy(track_data, lap_length, num_laps, 
 
     total_distance = num_laps * lap_length;
     dt = 0.1; % seconds
-    position = 0;
-    time = 0;
-    velocity = 0;
 
-    % Calculate optimal steady state speed (Vs) from time constraint
-    num_stops = length(stop_points);
-    A = num_stops / (2 * accel_from_stop_rate) + num_stops / (2 * decel_to_stop_rate);
-    A = A + 1 / (2 * accel_from_stop_rate) + 1 / (2 * decel_to_stop_rate);
-    B = -total_race_time * 60;
-    C = total_distance;
-    discriminant = B^2 - 4 * A * C;
-    if discriminant < 0
-        error('Acceleration and deceleration rates do not allow completion in the given time. Adjust parameters.');
-    end
-    Vs1 = (-B + sqrt(discriminant)) / (2 * A);
-    Vs2 = (-B - sqrt(discriminant)) / (2 * A);
-    if (Vs1 > 0 && Vs1 < maxVelocity) && (Vs1 < Vs2)
-        Vs = Vs1;
-    elseif Vs2 > 0 && Vs2 < maxVelocity
-        Vs = Vs2;
-    else
-        error('Cannot find valid steady-state velocity. Adjust parameters.');
-    end
+    Vs_guess = total_distance / (total_race_time * 60); % Initial guess
+    tolerance = 1.0; % seconds
+    max_iterations = 1000;
+    iter = 0;
+    final_time_error = Inf;
 
-    v_high = Vs + deltaV;
-    v_low = Vs - deltaV;
+    while abs(final_time_error) > tolerance && iter < max_iterations
+        iter = iter + 1;
 
-    if v_high > maxVelocity
-        error('Steady state speed plus deltaV greater than max vehicle velocity')
-    end
+        v_high = Vs_guess + deltaV;
+        v_low = Vs_guess - deltaV;
 
-    pos_arr = [];
-    vel_arr = [];
-    time_arr = [];
+        position = 0;
+        time = 0;
+        velocity = 0;
 
-    stop_idx = 1;
-    coast_phase = true;
-    accelerating_from_stop = true;
+        pos_arr = [];
+        vel_arr = [];
+        time_arr = [];
 
-    while position < total_distance
-        if stop_idx <= length(stop_points)
-            dist_to_stop = stop_points(stop_idx) - position;
-        else
-            dist_to_stop = Inf;
+        stop_idx = 1;
+        coast_phase = true;
+        accelerating_from_stop = true;
+
+        while (position + velocity * dt) < total_distance || velocity > 0.05
+            if stop_idx <= length(stop_points)
+                next_stop = stop_points(stop_idx);
+            else
+                next_stop = total_distance;
+            end
+
+            dist_to_stop = next_stop - position;
+            decel_to_stop_dist = velocity^2 / (2 * decel_to_stop_rate);
+
+            if dist_to_stop <= decel_to_stop_dist + 1e-2
+                coast_phase = true;
+                v_target = 0;
+            elseif coast_phase
+                v_target = v_low;
+            else
+                v_target = v_high;
+            end
+
+            if coast_phase
+                F_load = road_load_fn(velocity);
+                acc = -F_load;
+            elseif accelerating_from_stop
+                acc = accel_from_stop_rate;
+            else
+                acc = pulse_accel_rate;
+            end
+
+            velocity = velocity + acc * dt;
+            velocity = max(min(velocity, v_high), 0);
+
+            % Enforce gradual deceleration
+            if dist_to_stop <= decel_to_stop_dist + 1e-2
+                required_velocity = sqrt(max(0, 2 * decel_to_stop_rate * dist_to_stop));
+                velocity = min(velocity, required_velocity);
+            end
+
+            % Transition states based on distance to stop
+            if coast_phase && velocity <= v_low && dist_to_stop > decel_to_stop_dist + 1e-2
+                coast_phase = false;
+                accelerating_from_stop = false;
+            elseif ~coast_phase && velocity >= v_high && dist_to_stop > decel_to_stop_dist + 1e-2
+                coast_phase = true;
+            end
+
+            % Prevent overshooting stop points and finish
+            if position + velocity * dt > next_stop
+                velocity = max(0, (next_stop - position) / dt);
+            end
+
+            position = position + velocity * dt;
+            time = time + dt;
+
+            pos_arr(end+1,1) = position;
+            vel_arr(end+1,1) = velocity;
+            time_arr(end+1,1) = time;
+
+            if velocity <= 0.05 && dist_to_stop < 1
+                stop_idx = stop_idx + 1;
+                accelerating_from_stop = true;
+            end
         end
 
-        decel_to_stop_dist = v_low^2 / (2 * decel_to_stop_rate);
-        if dist_to_stop < decel_to_stop_dist
-            coast_phase = true;
-            v_target = 0;
-        elseif coast_phase
-            v_target = v_low;
-        else
-            v_target = v_high;
-        end
-
-        if coast_phase
-            F_load = road_load_fn(velocity);
-            acc = -F_load;
-        elseif accelerating_from_stop
-            acc = accel_from_stop_rate;
-        else
-            acc = pulse_accel_rate;
-        end
-
-        velocity = velocity + acc * dt;
-        velocity = max(min(velocity, v_high), 0);
-
-        if coast_phase && velocity <= v_low
-            coast_phase = false;
-            accelerating_from_stop = false;
-        elseif ~coast_phase && velocity >= v_high
-            coast_phase = true;
-        end
-
-        position = position + velocity * dt;
-        time = time + dt;
-
-        pos_arr(end+1,1) = position;
-        vel_arr(end+1,1) = velocity;
-        time_arr(end+1,1) = time;
-
-        if velocity <= 0.1 && dist_to_stop < 1
-            stop_idx = stop_idx + 1;
-            accelerating_from_stop = true;
-        end
+        final_time_error = time - total_race_time * 60;
+        % Vs_guess = Vs_guess + 0.05 * sign(-final_time_error);
+        % Adaptive step size (proportional control)
+        Vs_guess = Vs_guess + 0.001 * final_time_error;
+        fprintf("Total Distance Traveled:\t%.4f\nTotal Distance:\t%.4f\nVguess:\t%.4f\n\n",position,lap_length*num_laps,Vs_guess)
     end
 
     y_interp = interp1(x_dist_full, y_dist_full, pos_arr, 'linear', 'extrap');
@@ -199,6 +451,9 @@ function drive_matrix = PulseAndGlideStrategy(track_data, lap_length, num_laps, 
     grid on;
 end
 
+
+
+
 function stop_points = generate_stop_points(sizeStopPoints,lap_length,stop_point)
     stop_points = zeros(1,sizeStopPoints);
     laps = 0;
@@ -214,8 +469,3 @@ function stop_points = generate_stop_points(sizeStopPoints,lap_length,stop_point
         end
     end
 end
-
-% TODO/thoughts, should we use the calcs for finding the steady state average speed from the previous code
-% and then just have a parameter for deltaV or how much you deviate from
-% this average speed?
-% - Include total_race_time to find the optimal 

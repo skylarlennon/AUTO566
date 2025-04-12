@@ -5,18 +5,18 @@ xlabel('Time (s)')
 ylabel('Tractive Power (kW)')
 grid on
 
-figure
 
+figure
 %Cumulative Propelling Energy J
 subplot(2,1,1)
-plot(simTime, propellingEnergyOut)
+plot(simTime, propellingEnergyOut.*(1/1000)*(1/3600))
 xlabel('Time (s)')
 ylabel('Propelling Energy (kWh)')
 grid on
 
 %Cumulative Braking Energy
 subplot(2,1,2)
-plot(simTime, brakingEnergyOut)
+plot(simTime, brakingEnergyOut.*(1/1000)*(1/3600))
 xlabel('Time (s)')
 ylabel('Braking Energy (kWh)')
 grid on
