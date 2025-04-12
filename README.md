@@ -125,7 +125,7 @@ TODO
 - Create plot of total vehicle efficiency 
 - New plot for power losses
 - New plot for total energy losses
-- Iterate through gear ratio's
+- Iterate through gear ratios
 - Generate ideal motor data
 - Make a 'next steps' section 
     - 3D modeling 
