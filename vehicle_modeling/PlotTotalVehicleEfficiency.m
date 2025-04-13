@@ -10,18 +10,21 @@ xlabel("Time (s)")
 ylabel("Efficiency (%)")
 title("Total Vehicle Efficiency")
 
-% totalLossesFromDiff = batteryPowerAtTerminals - positiveTractivePowerOut;
+totalLossesFromDiff = batteryPowerAtTerminals - positiveTractivePowerOut;
 % totalLossesFromSum = drivelinePowerLossOut + motorPowerLossesOut + inverterLosses + AccessoryLoad;
-% 
-% figure;
-% hold on
-% % plot(tout, positiveTractivePowerOut,'LineWidth',2)
-% % plot(tout, batteryPowerAtTerminals,'LineWidth',2)
-% plot(tout, totalLossesFromDiff,'LineWidth',2)
-% plot(tout, totalLossesFromSum,'LineWidth',2)
-% hold off
-% grid on
-% xlabel('Time (s)')
-% ylabel('Power (W)')
-% legend('Losses from Diff','Losses from Sum')
 
+figure;
+hold on
+% plot(tout, positiveTractivePowerOut,'LineWidth',2)
+% plot(tout, batteryPowerAtTerminals,'LineWidth',2)
+plot(tout, totalLossesFromDiff,'LineWidth',2)
+hold off
+grid on
+xlabel('Time (s)')
+ylabel('Power (W)')
+title("Total Power Losses Including Overhead")
+
+totalEff = totalEff(~isnan(totalEff));
+totalEff = totalEff(totalEff > 0);
+avgTotalEff = mean(totalEff);
+fprintf('Mean Total Eff:\t\t%.4f %%\n',avgTotalEff)
