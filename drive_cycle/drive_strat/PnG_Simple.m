@@ -20,7 +20,7 @@ track_configs = [
     struct( ...
         'name', "Sonoma Raceway", ...
         'file', ["csv/flat_projected/Sonoma_flat_projected.csv"], ...
-        'num_laps', 10, ...
+        'num_laps', 9, ...
         'stop_point', 395 ...
     );
     struct( ...
@@ -32,7 +32,7 @@ track_configs = [
 ];
 
 %% === Select Track ===
-track_number = 1;   % 1 = Detroit Streets
+track_number = 2;   % 1 = Detroit Streets
                     % 2 = Indianapolis Motor Speedway
                     % 3 = Sonoma Raceway
                     % 4 = Test
@@ -55,8 +55,8 @@ stop_points = generate_stop_points(2*num_laps-1,lap_length,stop_point);
 
 %% Define Driving Strategy
 total_race_time = 35; % [minutes]           % [Edit based on track]
-accel_from_stop_rate = 0.3; % [m/s^2]       % [Edit based on track]
-decel_to_stop_rate = 0.3; % [m/s^2]        % [Edit based on track]
+accel_from_stop_rate = 0.4; % [m/s^2]       % [Edit based on track]
+decel_to_stop_rate = 0.5; % [m/s^2]        % [Edit based on track]
 pulse_accel_rate = 0.1; % [m/s^2]           % [Edit based on track]
 deltaV = 1; % [m/s]                         % [Edit based on track]
 maxVelocity = 17; % [m/s]                   % [Edit based on vehicle] 

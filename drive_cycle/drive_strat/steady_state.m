@@ -23,7 +23,7 @@ track_configs = [
         'name', "Sonoma Raceway", ...
         'file', ["csv/flat_projected/Sonoma_flat_projected.csv", ...
                  "csv/elev_projected/Sonoma_elev_projected.csv"], ...
-        'num_laps', 10, ...
+        'num_laps', 9, ...
         'stop_point', 395 ...
     );
     struct( ...
@@ -36,7 +36,7 @@ track_configs = [
 ];
 
 %% === Select Track ===
-track_number = 3;   % 1 = Detroit Streets
+track_number = 1;   % 1 = Detroit Streets
                     % 2 = Indianapolis Motor Speedway
                     % 3 = Sonoma Raceway
                     % 4 = Test
@@ -61,7 +61,7 @@ stop_points = generate_stop_points(2*num_laps-1,lap_length,stop_point);
 %% Define Driving Strategy
 total_race_time = 35; % [minutes]           % [Edit based on track]
 accel_rate = 0.4; % [m/s^2]                % [Edit based on track]
-decel_rate = 0.25; % [m/s^2]                % [Edit based on track]
+decel_rate = 0.5; % [m/s^2]                % [Edit based on track]
 max_speed = 15; % [m/s]                     % [Edit based on vehicle]           
 
 % Calculate driving strategy (this now includes plotting)
@@ -325,7 +325,7 @@ function drive_matrix = SimpleDriveStrategy(track_file, lap_length, num_laps, st
     fprintf('- Average Speed: %.2f m/s = %.2f km/h = %.2f mph \n', avg_velo,avg_velo*3.6,avg_velo*2.23694);
     fprintf('- Acceleration distance: %.2f m\n', accel_dist);
     fprintf('- Deceleration distance: %.2f m\n', decel_dist);
-    fprintf('- Total race distance: %.2f m\n', total_distance);
+    fprintf('- Total race distance: %.2f m = %.2f mi\n', total_distance,total_distance/1609);
     fprintf('- Total race time: %.2f minutes\n', time_vector(end)/60);
 end
 
