@@ -4,7 +4,7 @@
 clc;clear;close all;
 
 %% Select Track
-track_number = 0;   % 0 = Custom Track
+track_number = 3;   % 0 = Custom Track
                     % 1 = Detroit Streets
                     % 2 = Indianapolis Motor Speedway
                     % 3 = Sonoma Raceway
@@ -15,7 +15,7 @@ elev_params = [];
 is_circuit = -1;
 switch track_number
     case 0
-        track_name = "Test";
+        track_name = "Sonoma Elevated Simple";
         is_circuit = 1;
         lap_length = 1440; % [Input lap length]
         elev_profile_type = 'sections';

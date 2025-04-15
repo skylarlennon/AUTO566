@@ -32,7 +32,7 @@ track_configs = [
 ];
 
 %% === Select Track ===
-track_number = 2;   % 1 = Detroit Streets
+track_number = 1;   % 1 = Detroit Streets
                     % 2 = Indianapolis Motor Speedway
                     % 3 = Sonoma Raceway
                     % 4 = Test
