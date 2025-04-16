@@ -25,6 +25,7 @@ ylabel('Power (W)')
 title("Total Power Losses Including Overhead")
 
 totalEff = totalEff(~isnan(totalEff));
+totalEff = totalEff(~isinf(totalEff));
 totalEff = totalEff(totalEff > 0);
 avgTotalEff = mean(totalEff);
-fprintf('Mean Total Eff:\t\t%.4f %%\n',avgTotalEff)
+fprintf('Mean Total Eff:\t\t%.4f %%\n',avgTotalEff*100)

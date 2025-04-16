@@ -125,11 +125,10 @@ TODO
 - Create plot of total vehicle efficiency 
 - New plot for power losses
 - New plot for total energy losses
-- Iterate through gear ratios
 - Generate ideal motor data
 - Make a 'next steps' section 
     - 3D modeling 
     - Max velocity during turns
     - More advanced algorithms for determining optimal speed
         - PnG, but iterate through different values for the acc from stop, dec to stop, and pulse acc, to get all of the possible options, then cost function is total energy consumed, taking into consideration the powertrain efficiency, and the contours of the track 
-- 
+- Show gif of how when you increase the GR, all of the points on the eff contour shift along constant power lines

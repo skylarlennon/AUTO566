@@ -4,7 +4,7 @@
 clc;clear;close all;
 
 %% Select Track
-track_number = 0;   % 0 = Custom Track
+track_number = 2;   % 0 = Custom Track
                     % 1 = Detroit Streets
                     % 2 = Indianapolis Motor Speedway
                     % 3 = Sonoma Raceway
@@ -28,13 +28,13 @@ switch track_number
     case 1
         track_name = "Detroit";
         is_circuit = 1;
-        lap_length = 3895; % generated from google maps 'measure distance'
+        lap_length = 3725; % generated from google maps 'measure distance'
         elev_profile_type = 'flat';
         elev_params = [0, lap_length, 0];
     case 2
         track_name = "Indy";
         is_circuit = 1;
-        lap_length = 3925; % generated from google maps 'measure distance'
+        lap_length = 3850; % generated from google maps 'measure distance'
         elev_profile_type = 'flat';
         elev_params = [0, lap_length, 0];
     case 3

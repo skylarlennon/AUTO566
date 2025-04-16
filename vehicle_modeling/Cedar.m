@@ -1,6 +1,6 @@
 %% EV Simple
 %TODO: ADD DESCRIPTION HERE
-clc;clear;close all
+clc;clear;close all;
 %% Load Model Parameters
 LoadDriveCycle;
 
@@ -28,6 +28,10 @@ fprintf("Distance Traveled:\t%.4f (mi)\n",total_dist_mi)
 fprintf("Total Race Time:\t%.4f (min)\n",tout(end)/60)
 fprintf("Efficiency:\t\t%.4f (mi/kWh)\n",total_efficiency_miles_per_kWh)
 fprintf("Efficiency:\t\t%.4f (MPGe)\n",total_efficiency_mpge)
+fprintf("Max Current:\t\t%.4f (A)\n",max(batteryCurent))
+fprintf("Max Tractive Power:\t%.4f (kW)\n",max(tractivePowerOut))
+fprintf("Max Braking Force:\t%.4f (N)\n",-min(frictionBrakingForceOut))
+
 
 %% Plot Drive Cycle Adherance Over Time
 PlotDriveCycleAdherance;
