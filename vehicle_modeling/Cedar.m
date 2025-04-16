@@ -78,7 +78,7 @@ grid on
 % fprintf("Efficiency:\t\t%.4f (MPGe)\n",total_efficiency_mpge)
 % 
 % %% Plot Drive Cycle Adherance Over Time
-% PlotDriveCycleAdherance;
+PlotDriveCycleAdherance;
 % 
 % %% Plot Motor Torque Speed Operating Points
 % PlotTorqueSpeedOPs;
