@@ -3,8 +3,8 @@ grid on
 hold on
 
 yyaxis left
-% plot(tout, speedCommand,'-b')
-plot(time, speedCommand,'-b')
+plot(tout, speedCommand,'-b')
+% plot(time, speedCommand,'-b')
 plot(tout, speedVehicle,'-r')
 ylabel('Velocity (m/s)')
 

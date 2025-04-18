@@ -23,7 +23,7 @@ track_configs = [
         'name', "Sonoma Raceway", ...
         'file', ["csv/flat_projected/Sonoma_flat_projected.csv", ...
                  "csv/elev_projected/Sonoma_elev_projected.csv"], ...
-        'num_laps', 10, ...
+        'num_laps', 9, ...
         'stop_point', 395 ...
     );
     struct( ...
@@ -36,7 +36,7 @@ track_configs = [
 ];
 
 %% === Select Track ===
-track_number = 1;   % 1 = Detroit Streets
+track_number = 2;   % 1 = Detroit Streets
                     % 2 = Indianapolis Motor Speedway
                     % 3 = Sonoma Raceway
                     % 4 = Test
@@ -61,11 +61,16 @@ stop_points = generate_stop_points(2*num_laps-1,lap_length,stop_point);
 %% Define Driving Strategy
 total_race_time = 35; % [minutes]           % [Edit based on track]
 accel_rate = 0.4; % [m/s^2]                % [Edit based on track]
-decel_rate = 0.25; % [m/s^2]                % [Edit based on track]
+decel_rate = 0.5; % [m/s^2]                % [Edit based on track]
 max_speed = 15; % [m/s]                     % [Edit based on vehicle]           
 
 % Calculate driving strategy (this now includes plotting)
-SimpleDriveStrategy(track_file, lap_length, num_laps, stop_points, total_race_time, accel_rate, decel_rate, max_speed);
+drive_matrix = SimpleDriveStrategy(track_file, lap_length, num_laps, stop_points, total_race_time, accel_rate, decel_rate, max_speed);
+
+% Animate the drive strategy
+animate_drive_matrix(drive_matrix, track_file, selected_track.name, selected_track.num_laps)
+
+%% Functions
 
 function drive_matrix = SimpleDriveStrategy(track_file, lap_length, num_laps, stop_points, total_race_time, accel_rate, decel_rate, max_speed)
     % Load track data
@@ -283,6 +288,7 @@ function drive_matrix = SimpleDriveStrategy(track_file, lap_length, num_laps, st
     xline(finish_line, '--k');
     text(finish_line, 0, 'Finish', 'VerticalAlignment', 'bottom');
     hold off;
+    xlim([0 position(end)*1.01])
 
     % Plot velocity and elevation vs. time
     subplot(2,1,2);
@@ -318,6 +324,7 @@ function drive_matrix = SimpleDriveStrategy(track_file, lap_length, num_laps, st
         text(time_vector(finish_time_idx), 0, 'Finish', 'VerticalAlignment', 'bottom');
     end
     hold off;
+    xlim([0 time_vector(end)*1.01])
 
     % Print simulation summary
     fprintf('Simulation Summary:\n');
@@ -325,7 +332,7 @@ function drive_matrix = SimpleDriveStrategy(track_file, lap_length, num_laps, st
     fprintf('- Average Speed: %.2f m/s = %.2f km/h = %.2f mph \n', avg_velo,avg_velo*3.6,avg_velo*2.23694);
     fprintf('- Acceleration distance: %.2f m\n', accel_dist);
     fprintf('- Deceleration distance: %.2f m\n', decel_dist);
-    fprintf('- Total race distance: %.2f m\n', total_distance);
+    fprintf('- Total race distance: %.2f m = %.2f (mi)\n', total_distance,total_distance/1609);
     fprintf('- Total race time: %.2f minutes\n', time_vector(end)/60);
 end
 
@@ -344,3 +351,78 @@ function stop_points = generate_stop_points(sizeStopPoints,lap_length,stop_point
         end
     end
 end
+
+function animate_drive_matrix(drive_matrix, track_file, track_name, num_laps)
+    % Load base track data
+    track_data = readmatrix(track_file);
+    track_x = track_data(:,1);
+    track_z = track_data(:,3);
+
+    % Extend the track over all laps
+    track_x_laps = [];
+    track_z_laps = [];
+
+    lap_length = track_x(end);
+    for i = 0:(num_laps-1)
+        track_x_laps = [track_x_laps; track_x + i * lap_length];
+        track_z_laps = [track_z_laps; track_z];
+    end
+
+    % Extract vehicle path
+    x = drive_matrix(:,1);
+    z = drive_matrix(:,3);
+    time_vec = drive_matrix(:,5);
+
+    % Setup figure
+    % Desired figure size
+    fig_width = 1500;
+    fig_height = 75;
+    
+    % Get screen size: [left, bottom, screen_width, screen_height]
+    screen_size = get(0, 'ScreenSize');
+    
+    % Calculate centered position
+    left = (screen_size(3) - fig_width) / 2;
+    bottom = (screen_size(4) - fig_height) / 2;
+    
+    % Create centered figure window
+    figure('Color', 'w', 'Position', [left, bottom, fig_width, fig_height]);
+    hold on;
+    axis tight;
+    grid on;
+    title(['Vehicle Animation - ' track_name]);
+    xlabel('Track Distance (m)');
+    ylabel('Elevation (m)');
+
+    % Plot extended track
+    plot(track_x_laps, track_z_laps, 'k-', 'LineWidth', 1.5);
+
+    % Plot full planned vehicle path in light gray
+    plot(x, z, '-', 'Color', [0.8 0.8 0.8]);
+
+    % Initialize animated red dot
+    h = plot(x(1), z(1), 'ro', 'MarkerSize', 8, 'MarkerFaceColor', 'r');
+
+    % === Animation settings ===
+    frame_rate = 30;               % [frames/sec]
+    sim_duration = time_vec(end); % [sec]
+    animation_duration = 60;      % [sec] of playback time
+
+    n_frames = animation_duration * frame_rate;
+    anim_time_vec = linspace(0, sim_duration, n_frames);
+
+    % Interpolate vehicle position for smooth animation
+    x_anim = interp1(time_vec, x, anim_time_vec, 'linear', 'extrap');
+    z_anim = interp1(time_vec, z, anim_time_vec, 'linear', 'extrap');
+
+    % Animate
+    for i = 1:length(anim_time_vec)
+        set(h, 'XData', x_anim(i), 'YData', z_anim(i));
+        drawnow;
+        pause(1/frame_rate);
+    end
+
+    % Final position
+    set(h, 'XData', x_anim(end), 'YData', z_anim(end));
+end
+
